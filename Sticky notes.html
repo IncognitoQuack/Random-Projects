@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Ficons.iconarchive.com%2Ficons%2Fvexels%2Foffice%2F1024%2Fnotepad-icon.png&f=1&nofb=1&ipt=08352cfd971093c591acfd39012768195680834a3002c05a03c0650c728d27ac&ipo=images" type="image/x-icon">
+    <title>Sticky Notes</title>
+</head>
+<style>
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#main {
+    width: 100%;
+    min-height: 100vh;
+    padding-bottom: 50px;
+    background-color: #89a2e2cf;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#addBtn {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    background-color: #2d3436;
+    color: white;
+    padding: 10px;
+    border: 0;
+    outline: 0;
+    border-radius: 7px;
+}
+
+.note {
+    width: 400px;
+    height: 400px;
+    background-color: white;
+    margin: 15px;
+    margin-top: 55px;
+}
+
+.tool {
+    width: 100%;
+    background-color: #2d3436;
+    color: #ffffffe0;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 2px;
+}
+
+.tool i {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.note textarea {
+    border: none;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 4px;   
+}
+
+.note textarea:focus {
+    border: 0;
+    outline: 0;
+}
+</style>
+
+<body oncontextmenu="return false;">
+    <button id="addBtn">
+        <i class="fas fa-plus"></i>
+        Add Note
+    </button>
+    <div id="main">
+    
+        <script src="https://kit.fontawesome.com/bf520e6492.js" crossorigin="anonymous"></script>
+        <script>
+        const addBtn = document.querySelector("#addBtn")
+const main = document.querySelector("#main")
+let noteCount = 0;
+
+addBtn.addEventListener(
+    "click",
+    function() {
+        addNote()
+    }
+)
+const saveNotes = () => {
+    const notes = document.querySelectorAll(".note textarea");
+    console.log(notes);
+    const data = [];
+    notes.forEach(
+            (note) => {
+                data.push(note.value)
+            }
+        )
+       
+    if (data.length === 0) {
+        localStorage.removeItem("notes")
+    } else {
+        localStorage.setItem("notes", JSON.stringify(data))
+    }
+}
+
+const addNote = (text = "") => {
+    noteCount++;
+    const note = document.createElement("div");
+    note.classList.add("note")
+    note.innerHTML = `
+    <div class="tool">
+         <div>Note-${noteCount}</div>
+         <div>
+             <i class="save fas fa-save" title="Click to save"></i>
+             <i class="trash fas fa-trash" title="Click to remove"></i> 
+         </div>
+    </div>
+    <textarea spellcheck="true">${text}</textarea>
+    `;
+
+    note.querySelector(".trash").addEventListener(
+        "click",
+        function() {
+            note.remove()
+            saveNotes()
+            updateNoteNumbers()
+        }
+    )
+    note.querySelector(".save").addEventListener(
+        "click",
+        function() {
+            saveNotes()
+        }
+    )
+    note.querySelector("textarea").addEventListener(
+        "focusout",
+        function() {
+            saveNotes()
+        }
+    )
+    main.appendChild(note);
+    saveNotes()
+}
+
+const updateNoteNumbers = () => {
+    const noteTools = document.querySelectorAll(".note .tool");
+    noteCount = 0;
+    noteTools.forEach((tool, index) => {
+        tool.querySelector("div").textContent = `Note-${index + 1}`;
+        noteCount++;
+    });
+}
+
+(
+    function() {
+        const lsNotes = JSON.parse(localStorage.getItem("notes"));
+        if (lsNotes === null) {
+            addNote()
+        } else {
+            lsNotes.forEach(
+                (lsNote) => {
+                    addNote(lsNote)
+                }
+            )
+        }
+
+    }
+)()
+
+console.log("Licensed issued by  ~ Encryptera Pvt.Ltd")
+        </script>
+</body>
+</html>

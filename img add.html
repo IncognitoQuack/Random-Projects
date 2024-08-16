@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Display</title>
+<link rel="icon" href="https://cdn1.iconfinder.com/data/icons/science-technology-colors/91/Science__Technology_39-512.png" type="image/x-icon">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    color: white;
+  }
+
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  #mediaList {
+    display: flex;
+    flex-direction: column-reverse; /* Display new media at the top */
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .media-wrapper {
+    position: relative;
+  }
+
+  .media-wrapper img,
+  .media-wrapper video {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  .media-wrapper iframe {
+    max-width: 720px;
+    height: 600px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  .hide-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    cursor: pointer;
+    display: none;
+  }
+
+  .media-wrapper:hover .hide-button {
+    display: block;
+  }
+
+  .media-wrapper.hidden {
+    display: none;
+  }
+
+  #dropArea {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #mediaUrl {
+    margin-top: 20px;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="dropArea">
+    <p><b>Drag and drop an image here or</b> <b id="clickToSelect">click to select</b></p>
+  </div>
+  <input type="text" id="mediaUrl" placeholder="𝗘𝗻𝘁𝗲𝗿 𝗺𝗲𝗱𝗶𝗮 𝗨𝗥𝗟">
+  <div id="mediaList"></div>
+      <button style="background-color: #333; color: #000000; padding: 0;
+border: none;" id="resizeButton">.</button>
+</div>
+
+
+<script>
+  const mediaUrlInput = document.getElementById('mediaUrl');
+  const dropArea = document.getElementById('dropArea');
+  const mediaList = document.getElementById('mediaList');
+  const clickToSelect = document.getElementById('clickToSelect');
+  const resizeButton = document.getElementById('resizeButton');
+  let isResized = false;
+
+  dropArea.addEventListener('dragenter', preventDefault);
+  dropArea.addEventListener('dragover', preventDefault);
+  dropArea.addEventListener('drop', handleDrop);
+
+  clickToSelect.addEventListener('click', pasteFromClipboard);
+
+  resizeButton.addEventListener('click', toggleResize);
+
+  mediaUrlInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const url = mediaUrlInput.value.trim();
+      addMediaByUrl(url);
+    }
+  });
+
+  function preventDefault(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const file = e.dataTransfer.files[0];
+
+    if (file) {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+
+      if (isImage || isVideo) {
+        addMedia(file, isImage, isVideo);
+      } else {
+        alert('Please drop a valid image or video file.');
+      }
+    }
+  }
+
+  function pasteFromClipboard() {
+    navigator.clipboard.read().then(data => {
+      for (const item of data) {
+        if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
+          item.getType('image/png').then(blob => {
+            addMedia(blob, true, false);
+          });
+          item.getType('image/jpeg').then(blob => {
+            addMedia(blob, true, false);
+          });
+        }
+      }
+    });
+  }
+
+  function toggleResize() {
+    const mediaElements = mediaList.querySelectorAll('img, video');
+    isResized = !isResized;
+
+    for (const mediaElement of mediaElements) {
+      if (isResized) {
+        mediaElement.style.width = '500px';
+        mediaElement.style.height = '500px';
+      } else {
+        mediaElement.style.width = 'auto';
+        mediaElement.style.height = 'auto';
+      }
+    }
+  }
+
+  function addMediaByUrl(url) {
+    if (url) {
+      const isImage = url.match(/\.(jpeg|jpg|gif|png)$/i);
+      const isVideo = url.match(/\.(mp4)$/i);
+
+      if (isImage || isVideo) {
+        const mediaElement = createMedia(url, isImage, isVideo);
+        mediaList.insertBefore(mediaElement, mediaList.firstChild);
+      } else {
+        const mediaElement = createIframe(url);
+        mediaList.insertBefore(mediaElement, mediaList.firstChild);
+      }
+
+      mediaUrlInput.value = '';
+    }
+  }
+
+  function addMedia(file, isImage, isVideo) {
+    const mediaElement = createMedia(URL.createObjectURL(file), isImage, isVideo);
+    mediaList.insertBefore(mediaElement, mediaList.firstChild);
+  }
+
+  function createMedia(src, isImage, isVideo) {
+    const mediaWrapper = document.createElement('div');
+    mediaWrapper.className = 'media-wrapper';
+
+    if (isImage) {
+      const mediaElement = document.createElement('img');
+      mediaElement.src = src;
+      mediaElement.addEventListener('click', toggleMedia);
+      mediaWrapper.appendChild(mediaElement);
+    } else if (isVideo) {
+      const mediaElement = document.createElement('video');
+      mediaElement.src = src;
+      mediaElement.setAttribute('autoplay', true);
+      mediaElement.setAttribute('loop', true);
+      mediaElement.setAttribute('muted', true);
+      mediaElement.setAttribute('controls', false);
+      mediaElement.addEventListener('click', toggleMedia);
+      mediaWrapper.appendChild(mediaElement);
+    }
+
+    const hideButton = document.createElement('button');
+    hideButton.className = 'hide-button';
+    hideButton.innerText = '𝕩';
+    hideButton.addEventListener('click', hideMedia);
+    mediaWrapper.appendChild(hideButton);
+
+    return mediaWrapper;
+  }
+
+  function createIframe(src) {
+    const iframeElement = document.createElement('iframe');
+    iframeElement.src = src;
+    iframeElement.style.width = '720px';
+    iframeElement.style.height = '600px';
+    return iframeElement;
+  }
+
+  function toggleMedia(event) {
+    const mediaWrapper = event.target.parentNode;
+    const hideButton = mediaWrapper.querySelector('.hide-button');
+    hideButton.style.display = hideButton.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function hideMedia(event) {
+    const mediaWrapper = event.target.parentNode;
+    mediaWrapper.style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
