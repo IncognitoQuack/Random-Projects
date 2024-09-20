@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image to SVG Converter</title>
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Include CSS -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #ece9e6, #ffffff);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #4285f4;
+            color: #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .upload-label:hover {
+            background-color: #3367d6;
+            transform: scale(1.05);
+        }
+
+        .upload-label input {
+            display: none;
+        }
+
+        .preview-section, .code-section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        #svgPreview {
+            border: 1px solid #ddd;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fafafa;
+            border-radius: 5px;
+            overflow: auto;
+        }
+
+        #svgPreview svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #svgCode {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            resize: vertical;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+
+        #svgCode:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+        }
+
+        .download-section {
+            text-align: center;
+        }
+
+        .download-section button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            background-color: #34a853;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .download-section button:hover {
+            background-color: #0f9d58;
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #svgPreview svg {
+            animation: fadeIn 0.5s;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .upload-label, .download-section button {
+                width: 100%;
+                margin-bottom: 15px;
+                border-radius: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image to SVG Converter</h1>
+        <div class="upload-section">
+           <label for="imageUpload" class="upload-label">
+                <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg, image/webp">
+                <span>Click to Upload Image</span>
+            </label>
+        </div>
+        <div class="preview-section">
+            <h2>SVG Preview</h2>
+            <div id="svgPreview"></div>
+        </div>
+        <div class="code-section">
+            <h2>SVG Code</h2>
+            <textarea id="svgCode"></textarea>
+        </div>
+        <div class="download-section">
+            <button id="downloadPng">Download as PNG</button>
+            <button id="downloadJpg">Download as JPG</button>
+        </div>
+    </div>
+
+    <!-- Include ImageTracer.js from CDN -->
+    <script src="https://unpkg.com/imagetracerjs@1.2.7/imagetracer_v1.2.7.js"></script>
+    <!-- Include FileSaver.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- JavaScript code -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var imageUpload = document.getElementById('imageUpload');
+            var svgPreview = document.getElementById('svgPreview');
+            var svgCode = document.getElementById('svgCode');
+            var downloadPng = document.getElementById('downloadPng');
+            var downloadJpg = document.getElementById('downloadJpg');
+
+            var svgString = '';
+
+            imageUpload.addEventListener('change', handleImageUpload);
+            svgCode.addEventListener('input', updateSvgPreview);
+            downloadPng.addEventListener('click', function() {
+                downloadImage('png');
+            });
+            downloadJpg.addEventListener('click', function() {
+                downloadImage('jpg');
+            });
+
+            function handleImageUpload(event) {
+                var file = event.target.files[0];
+                if (file && file.type.match('image.*')) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var img = new Image();
+                        img.onload = function() {
+                            // Convert image to SVG using ImageTracer
+                            var options = {
+                                // Customize options as needed
+                                // You can adjust palette, error thresholds, etc.
+                            };
+
+                            // Process the image to SVG
+                            var imgData = ImageTracer.getImgdata(img, 1);
+                            svgString = ImageTracer.imagedataToSVG(imgData, options);
+
+                            // Display the SVG code in the textarea
+                            svgCode.value = svgString;
+
+                            // Display the SVG preview
+                            svgPreview.innerHTML = svgString;
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert('Please upload a valid image file.');
+                }
+            }
+
+            function updateSvgPreview() {
+                svgString = svgCode.value;
+                svgPreview.innerHTML = svgString;
+            }
+
+            function downloadImage(format) {
+                if (!svgString) {
+                    alert('Please upload an image and convert it to SVG first.');
+                    return;
+                }
+
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+
+                var svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+                var DOMURL = self.URL || self.webkitURL || self;
+                var url = DOMURL.createObjectURL(svgBlob);
+
+                var img = new Image();
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    DOMURL.revokeObjectURL(url);
+
+                    canvas.toBlob(function(blob) {
+                        saveAs(blob, 'converted_image.' + format);
+                    }, 'image/' + format);
+                };
+                img.onerror = function() {
+                    alert('Error converting SVG to image. Please check the SVG code for errors.');
+                    DOMURL.revokeObjectURL(url);
+                };
+                img.src = url;
+            }
+        });
+    </script>
+</body>
+</html>
