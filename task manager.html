@@ -3,8 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Task Manager</title>
-  <link rel="icon" href="https://www.pngall.com/wp-content/uploads/8/Task-PNG-Free-Download.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #1e1f26;
+      --secondary-color: #23252b;
+      --text-color: #ffffff;
+      --accent-color: #6272a4;
+      --background-color: #282a36;
+      --card-background: #44475a;
+      --input-background: #44475a;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -12,9 +23,9 @@
     }
 
     body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #1e1f26;
-      color: #fff;
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--primary-color);
+      color: var(--text-color);
       display: flex;
       height: 100vh;
       overflow: hidden;
@@ -22,7 +33,7 @@
 
     /* Sidebar */
     .sidebar {
-      background-color: #23252b;
+      background-color: var(--secondary-color);
       width: 250px;
       padding: 30px 20px;
       box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
@@ -30,9 +41,10 @@
 
     .sidebar h2 {
       margin-bottom: 30px;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 24px;
       text-align: center;
+      color: #fff;
     }
 
     .sidebar ul {
@@ -46,6 +58,7 @@
       margin-bottom: 10px;
       transition: background 0.3s;
       font-size: 18px;
+      color: #fff;
     }
 
     .sidebar ul li.active,
@@ -55,9 +68,9 @@
 
     /* Main Content */
     .content {
-      flex: 1;
-      padding: 30px;
-      background-color: #282a36;
+      flex-grow: 1;
+      padding: 40px;
+      background-color: var(--background-color);
       overflow-y: auto;
     }
 
@@ -65,29 +78,53 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .content-header h2 {
-      font-weight: 700;
+      font-weight: 600;
       font-size: 28px;
     }
 
-    .add-task-btn {
-      padding: 12px 25px;
-      background-color: #6272a4;
-      color: #fff;
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .button {
+      padding: 12px 24px;
       border: none;
-      cursor: pointer;
       border-radius: 8px;
+      cursor: pointer;
       font-size: 16px;
-      transition: background 0.3s;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      background-color: var(--accent-color);
+      color: #fff;
     }
 
-    .add-task-btn:hover {
+    .button i.material-icons {
+      margin-right: 8px;
+    }
+
+    .button:hover {
       background-color: #7082bf;
+      transform: translateY(-2px);
     }
 
-    /* Search Bar */
+    .button-secondary {
+      background-color: transparent;
+      color: var(--accent-color);
+      border: 2px solid var(--accent-color);
+    }
+
+    .button-secondary:hover {
+      background-color: var(--accent-color);
+      color: #fff;
+    }
+
     .search-bar {
       margin-top: 20px;
       position: relative;
@@ -99,7 +136,7 @@
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      background-color: #44475a;
+      background-color: var(--input-background);
       color: #fff;
     }
 
@@ -107,16 +144,15 @@
       color: #bbb;
     }
 
-    .search-bar i {
+    .search-bar .search-icon {
       position: absolute;
-      right: 20px;
+      right: 15px;
       top: 50%;
       transform: translateY(-50%);
       color: #bbb;
-      font-size: 20px;
+      font-size: 24px;
     }
 
-    /* Task Cards */
     .tasks {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -125,7 +161,7 @@
     }
 
     .task-card {
-      background-color: #44475a;
+      background-color: var(--card-background);
       border-radius: 12px;
       padding: 25px;
       position: relative;
@@ -156,7 +192,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      -webkit-line-clamp: 3; /* Number of lines before truncating */
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       position: relative;
       cursor: pointer;
@@ -172,7 +208,7 @@
       position: absolute;
       right: 0;
       bottom: 0;
-      background-color: #44475a;
+      background-color: var(--card-background);
       padding-left: 10px;
       display: block;
     }
@@ -227,7 +263,7 @@
       color: #bd93f9;
     }
 
-    /* Modal for Adding/Editing Task */
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -298,36 +334,97 @@
       margin-top: 30px;
     }
 
-    .modal-content .modal-actions button {
-      padding: 12px 25px;
-      border: none;
-      border-radius: 8px;
+    .modal-content .modal-actions .button {
+      width: 48%;
+    }
+
+    /* Profile Modal */
+    #profile-modal .modal-content {
+      width: 350px;
+    }
+
+    #profile-modal .profile-options {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #profile-modal .profile-options .button {
+      width: 80%;
+    }
+
+    #profile-modal #drop-zone {
+      width: 100%;
+      border: 2px dashed #ccc;
+      padding: 20px;
+      text-align: center;
+      color: #44475a;
+      margin-top: 10px;
+    }
+
+    /* Profile Section */
+    .profile-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-image-container {
+      position: relative;
+    }
+
+    .profile-image-container img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
       cursor: pointer;
-      font-size: 16px;
     }
 
-    .modal-content .modal-actions #save-task {
-      background-color: #6272a4;
-      color: #fff;
+    .profile-name-container {
+      margin-top: 10px;
+      width: 100%;
+      text-align: center;
     }
 
-    .modal-content .modal-actions #save-task:hover {
-      background-color: #7082bf;
+    #user-name {
+      cursor: pointer;
+      font-size: 18px;
     }
 
-    .modal-content .modal-actions .close {
-      background-color: #ff5555;
-      color: #fff;
-    }
-
-    .modal-content .modal-actions .close:hover {
-      background-color: #ff6e6e;
+    #user-name-input {
+      display: none;
+      text-align: center;
+      width: 100%;
+      border: none;
+      background: none;
+      color: inherit;
+      font-size: 18px;
+      font-family: inherit;
     }
 
     /* Responsive Design */
     @media (max-width: 600px) {
       .tasks {
         grid-template-columns: 1fr;
+      }
+
+      .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .action-buttons {
+        margin-top: 15px;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .action-buttons .button {
+        flex: 1 1 calc(50% - 10px);
       }
     }
 
@@ -337,24 +434,69 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #282a36;
+      background: var(--background-color);
     }
 
     ::-webkit-scrollbar-thumb {
-      background: #44475a;
+      background: var(--accent-color);
       border-radius: 4px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: #6272a4;
+      background: #7082bf;
+    }
+
+    /* Message Box Styling */
+    .message-box {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--accent-color);
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.3s ease forwards;
+      z-index: 1001;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-box.error {
+      background-color: #b00020;
+    }
+
+    /* Focus States */
+    button:focus, input:focus, textarea:focus {
+      outline: 2px solid var(--accent-color);
+      outline-offset: 2px;
     }
   </style>
 </head>
 <body>
   <div class="sidebar">
-    <div>
-      <h2>Task Manager</h2>
+    <h2>Task Manager</h2>
+<br>
+    <!-- Profile Section -->
+    <div class="profile-section">
+      <div class="profile-image-container">
+        <img id="profile-image" src="https://www.pngkit.com/png/detail/126-1262807_instagram-default-profile-picture-png.png" alt="Profile Image">
+      </div>
+      <div class="profile-name-container">
+        <p id="user-name"><b><i>User</i></b></p>
+        <input id="user-name-input" type="text" value="User">
+      </div>
     </div>
+<br><br>
     <ul id="filters">
       <li class="active" data-filter="all">All Tasks</li>
       <li data-filter="important">Important</li>
@@ -366,19 +508,77 @@
   <div class="content">
     <div class="content-header">
       <h2>All Tasks</h2>
-      <button class="add-task-btn">Add New Task</button>
+      <div class="action-buttons">
+        <button class="button" id="add-task-btn">
+          <i class="material-icons">add</i> Add Task
+        </button>
+        <button class="button button-secondary" id="advanced-filter-btn">
+          <i class="material-icons">filter_list</i> Filters
+        </button>        
+        <button class="button button-secondary" id="download-tasks-btn">
+          <i class="material-icons">file_download</i> Download
+        </button>
+        <button class="button button-secondary" id="upload-tasks-btn">
+          <i class="material-icons">file_upload</i> Upload
+        </button>
+        <input type="file" id="upload-input" accept=".json" style="display:none">
+      </div>
     </div>
 
     <div class="search-bar">
       <input type="text" id="search-input" placeholder="Search tasks...">
-      <i class="fas fa-search"></i>
+      <i class="material-icons search-icon">search</i>
     </div>
+
+    <!-- Advanced Filter Modal -->
+<div class="modal" id="filter-modal">
+  <div class="modal-content">
+    <h3>Advanced Filters</h3>
+    <div class="form-group">
+      <label for="filter-title-input">Title Contains</label>
+      <input type="text" id="filter-title-input" placeholder="Search by title">
+    </div>
+    <div class="form-group">
+      <label for="filter-desc-input">Description Contains</label>
+      <input type="text" id="filter-desc-input" placeholder="Search by description">
+    </div>
+    <div class="form-group">
+      <label for="filter-date-from">Due Date From</label>
+      <input type="text" id="filter-date-from" placeholder="dd-mm-yyyy">
+    </div>
+    <div class="form-group">
+      <label for="filter-date-to">Due Date To</label>
+      <input type="text" id="filter-date-to" placeholder="dd-mm-yyyy">
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="filter-important-input">
+      <label for="filter-important-input">Show Only Important</label>
+    </div>
+    <div class="form-group">
+      <label for="filter-status-select">Status</label>
+      <select id="filter-status-select">
+        <option value="">Any</option>
+        <option value="Completed">Completed</option>
+        <option value="Incomplete">Incomplete</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="button" id="apply-filters-btn">
+        <i class="material-icons">filter_list</i> Apply Filters
+      </button>
+      <button class="button button-secondary" id="reset-filters-btn">
+        <i class="material-icons">refresh</i> Reset Filters
+      </button>
+    </div>
+  </div>
+</div>
 
     <div class="tasks" id="tasks">
       <!-- Task cards will be added here by JavaScript -->
     </div>
   </div>
 
+  <!-- Modal for Add/Edit Task -->
   <div class="modal" id="task-modal">
     <div class="modal-content">
       <h3 id="modal-title">Add New Task</h3>
@@ -399,248 +599,644 @@
         <label for="task-important-input">Mark as Important</label>
       </div>
       <div class="modal-actions">
-        <button id="save-task">Save Task</button>
-        <button class="close" id="close-modal">Cancel</button>
+        <button class="button" id="save-task">
+          <i class="material-icons">save</i> Save Task
+        </button>
+        <button class="button button-secondary" id="close-modal">
+          <i class="material-icons">cancel</i> Cancel
+        </button>
       </div>
     </div>
   </div>
 
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <!-- Modal for Profile Picture -->
+  <div class="modal" id="profile-modal">
+    <div class="modal-content">
+      <h3>Select Profile Picture</h3>
+      <div class="profile-options">
+        <button id="enter-url-btn" class="button">Enter Image URL</button>
+        <button id="select-image-btn" class="button">Select Image from Device</button>
+        <p>Or drag and drop an image below:</p>
+        <div id="drop-zone">Drop image here</div>
+      </div>
+      <div class="modal-actions">
+        <button class="button button-secondary" id="close-profile-modal">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    let isEditing = false;
-    let currentEditIndex = null;
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+let isEditing = false;
+let currentEditIndex = null;
 
-    const taskContainer = document.getElementById('tasks');
-    const modal = document.getElementById('task-modal');
-    const addTaskBtn = document.querySelector('.add-task-btn');
-    const closeModalBtn = document.getElementById('close-modal');
-    const saveTaskBtn = document.getElementById('save-task');
-    const filters = document.querySelectorAll('#filters li');
-    const contentHeaderTitle = document.querySelector('.content-header h2');
-    const searchInput = document.getElementById('search-input');
-    const modalTitle = document.getElementById('modal-title');
+const taskContainer = document.getElementById('tasks');
+const modal = document.getElementById('task-modal');
+const addTaskBtn = document.getElementById('add-task-btn');
+const closeModalBtn = document.getElementById('close-modal');
+const saveTaskBtn = document.getElementById('save-task');
+const filters = document.querySelectorAll('#filters li');
+const contentHeaderTitle = document.querySelector('.content-header h2');
+const searchInput = document.getElementById('search-input');
+const modalTitle = document.getElementById('modal-title');
+const downloadTasksBtn = document.getElementById('download-tasks-btn');
+const uploadTasksBtn = document.getElementById('upload-tasks-btn');
+const uploadInput = document.getElementById('upload-input');
 
-    function saveTasksToStorage() {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
+// Advanced Filter Elements
+const advancedFilterBtn = document.getElementById('advanced-filter-btn');
+const filterModal = document.getElementById('filter-modal');
+const applyFiltersBtn = document.getElementById('apply-filters-btn');
+const resetFiltersBtn = document.getElementById('reset-filters-btn');
+
+// Advanced Filter Inputs
+const filterTitleInput = document.getElementById('filter-title-input');
+const filterDescInput = document.getElementById('filter-desc-input');
+const filterDateFromInput = document.getElementById('filter-date-from');
+const filterDateToInput = document.getElementById('filter-date-to');
+const filterImportantInput = document.getElementById('filter-important-input');
+const filterStatusSelect = document.getElementById('filter-status-select');
+
+let advancedFiltersApplied = false;
+
+function saveTasksToStorage() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function parseDate(dateStr) {
+  // Handle both dd-mm-yyyy and yyyy-mm-dd formats
+  const dateParts = dateStr.split('-');
+  if (dateParts.length === 3) {
+    if (dateParts[0].length === 4) {
+      // yyyy-mm-dd format
+      return new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+    } else {
+      // dd-mm-yyyy format
+      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+    }
+  }
+  return new Date(dateStr);
+}
+
+function formatDate(dateObj) {
+  const day = ('0' + dateObj.getDate()).slice(-2);
+  const month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+  const year = dateObj.getFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+function renderTasks(filter = 'all', searchQuery = '') {
+  taskContainer.innerHTML = '';
+  let filteredTasks = tasks.filter(task => {
+    // Advanced Filters
+    if (advancedFiltersApplied) {
+      if (
+        filterTitleInput.value &&
+        !task.title.toLowerCase().includes(filterTitleInput.value.toLowerCase())
+      )
+        return false;
+      if (
+        filterDescInput.value &&
+        !task.desc.toLowerCase().includes(filterDescInput.value.toLowerCase())
+      )
+        return false;
+      if (filterDateFromInput.value) {
+        const fromDate = parseDate(filterDateFromInput.value);
+        const taskDate = parseDate(task.date);
+        if (taskDate < fromDate) return false;
+      }
+      if (filterDateToInput.value) {
+        const toDate = parseDate(filterDateToInput.value);
+        const taskDate = parseDate(task.date);
+        if (taskDate > toDate) return false;
+      }
+      if (filterImportantInput.checked && !task.important) return false;
+      if (filterStatusSelect.value && task.status !== filterStatusSelect.value)
+        return false;
     }
 
-    function renderTasks(filter = 'all', searchQuery = '') {
-      taskContainer.innerHTML = '';
-      let filteredTasks = tasks.filter(task => {
-        if (filter === 'important' && !task.important) return false;
-        if (filter === 'completed' && task.status !== 'Completed') return false;
-        if (filter === 'incomplete' && task.status !== 'Incomplete') return false;
-        if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase()) && !task.desc.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-        return true;
+    // Sidebar Filters
+    if (filter === 'important' && !task.important) return false;
+    if (filter === 'completed' && task.status !== 'Completed') return false;
+    if (filter === 'incomplete' && task.status !== 'Incomplete') return false;
+
+    // Search Query
+    if (
+      searchQuery &&
+      !task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !task.desc.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
+    return true;
+  });
+
+  contentHeaderTitle.textContent =
+    filter.charAt(0).toUpperCase() + filter.slice(1) + ' Tasks';
+
+  if (filteredTasks.length === 0) {
+    taskContainer.innerHTML =
+      '<p style="text-align:center; font-size:18px;">No tasks to display.</p>';
+    return;
+  }
+
+  filteredTasks.forEach((task, index) => {
+    const taskCard = document.createElement('div');
+    taskCard.classList.add('task-card');
+    taskCard.draggable = true;
+    taskCard.dataset.index = index;
+
+    const taskTitle = document.createElement('h3');
+    taskTitle.innerText = task.title;
+
+    const taskDesc = document.createElement('p');
+    taskDesc.classList.add('description');
+    taskDesc.innerText = task.desc;
+    taskDesc.addEventListener('click', () => {
+      taskDesc.classList.toggle('expanded');
+    });
+
+    const taskDate = document.createElement('p');
+    taskDate.classList.add('date');
+    taskDate.innerText = 'Due: ' + task.date;
+
+    const taskStatus = document.createElement('span');
+    taskStatus.classList.add('status', task.status.toLowerCase());
+    taskStatus.innerText = task.status;
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.classList.add('actions');
+
+    const editBtn = document.createElement('button');
+    editBtn.innerHTML = '<i class="material-icons">edit</i>';
+    editBtn.title = 'Edit Task';
+    editBtn.onclick = (e) => {
+      e.stopPropagation();
+      editTask(index);
+    };
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerHTML = '<i class="material-icons">delete</i>';
+    deleteBtn.title = 'Delete Task';
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      deleteTask(index);
+    };
+
+    const completeBtn = document.createElement('button');
+    completeBtn.innerHTML =
+      '<i class="material-icons">' +
+      (task.status === 'Completed' ? 'undo' : 'check_circle') +
+      '</i>';
+    completeBtn.title =
+      task.status === 'Completed' ? 'Mark as Incomplete' : 'Mark as Completed';
+    completeBtn.onclick = (e) => {
+      e.stopPropagation();
+      toggleTaskStatus(index);
+    };
+
+    actionsDiv.append(editBtn, deleteBtn, completeBtn);
+    taskCard.append(actionsDiv, taskTitle, taskDesc, taskDate, taskStatus);
+    taskContainer.append(taskCard);
+  });
+
+  addDragAndDropListeners();
+}
+
+function deleteTask(index) {
+  if (confirm('Are you sure you want to delete this task?')) {
+    tasks.splice(index, 1);
+    saveTasksToStorage();
+    renderTasks(getCurrentFilter(), searchInput.value.trim());
+    showMessage('Task deleted successfully.');
+  }
+}
+
+function toggleTaskStatus(index) {
+  tasks[index].status =
+    tasks[index].status === 'Completed' ? 'Incomplete' : 'Completed';
+  saveTasksToStorage();
+  renderTasks(getCurrentFilter(), searchInput.value.trim());
+  showMessage('Task status updated.');
+}
+
+function editTask(index) {
+  isEditing = true;
+  currentEditIndex = index;
+  const task = tasks[index];
+
+  document.getElementById('task-title-input').value = task.title;
+  document.getElementById('task-desc-input').value = task.desc;
+  document.getElementById('task-date-input').value = task.date;
+  document.getElementById('task-important-input').checked = task.important;
+  modalTitle.textContent = 'Edit Task';
+  modal.style.display = 'flex';
+}
+
+addTaskBtn.onclick = () => {
+  isEditing = false;
+  currentEditIndex = null;
+  modalTitle.textContent = 'Add New Task';
+  clearModalFields();
+  modal.style.display = 'flex';
+};
+
+closeModalBtn.onclick = () => {
+  modal.style.display = 'none';
+  clearModalFields();
+};
+
+saveTaskBtn.onclick = () => {
+  const title = document.getElementById('task-title-input').value.trim();
+  const desc = document.getElementById('task-desc-input').value.trim();
+  const dateStr = document.getElementById('task-date-input').value.trim();
+  const important = document.getElementById('task-important-input').checked;
+
+  if (title && desc && dateStr) {
+    // Validate date format (accept both dd-mm-yyyy and yyyy-mm-dd)
+    const dateRegex = /^(\d{2}-\d{2}-\d{4}|\d{4}-\d{2}-\d{2})$/;
+    if (!dateRegex.test(dateStr)) {
+      showMessage('Date must be in dd-mm-yyyy or yyyy-mm-dd format.', 'error');
+      return;
+    }
+
+    // Check if the date is valid
+    const date = parseDate(dateStr);
+    if (isNaN(date.getTime())) {
+      showMessage('Invalid date.', 'error');
+      return;
+    }
+
+    // Standardize date format to dd-mm-yyyy
+    const formattedDate = formatDate(date);
+
+    if (isEditing) {
+      tasks[currentEditIndex] = {
+        ...tasks[currentEditIndex],
+        title,
+        desc,
+        date: formattedDate,
+        important,
+      };
+      showMessage('Task updated successfully.');
+    } else {
+      tasks.push({
+        title,
+        desc,
+        date: formattedDate,
+        status: 'Incomplete',
+        important,
       });
+      showMessage('Task added successfully.');
+    }
+    modal.style.display = 'none';
+    saveTasksToStorage();
+    renderTasks(getCurrentFilter(), searchInput.value.trim());
+    clearModalFields();
+  } else {
+    showMessage('Please fill in all fields.', 'error');
+  }
+};
 
-      contentHeaderTitle.textContent = filter.charAt(0).toUpperCase() + filter.slice(1) + ' Tasks';
+function clearModalFields() {
+  document.getElementById('task-title-input').value = '';
+  document.getElementById('task-desc-input').value = '';
+  document.getElementById('task-date-input').value = '';
+  document.getElementById('task-important-input').checked = false;
+}
 
-      if (filteredTasks.length === 0) {
-        taskContainer.innerHTML = '<p style="text-align:center; font-size:18px;">No tasks to display.</p>';
-        return;
-      }
+window.onclick = function (event) {
+  if (event.target == modal) {
+    modal.style.display = 'none';
+    clearModalFields();
+  }
+  if (event.target == profileModal) {
+    profileModal.style.display = 'none';
+  }
+  if (event.target == filterModal) {
+    filterModal.style.display = 'none';
+  }
+};
 
-      filteredTasks.forEach((task, index) => {
-        const taskCard = document.createElement('div');
-        taskCard.classList.add('task-card');
-        taskCard.draggable = true;
-        taskCard.dataset.index = index;
+filters.forEach((filter) => {
+  filter.addEventListener('click', function () {
+    document.querySelector('#filters li.active').classList.remove('active');
+    this.classList.add('active');
+    renderTasks(this.dataset.filter, searchInput.value.trim());
+  });
+});
 
-        const taskTitle = document.createElement('h3');
-        taskTitle.innerText = task.title;
+searchInput.addEventListener('input', function () {
+  renderTasks(getCurrentFilter(), this.value.trim());
+});
 
-        const taskDesc = document.createElement('p');
-        taskDesc.classList.add('description');
-        taskDesc.innerText = task.desc;
-        taskDesc.addEventListener('click', () => {
-          taskDesc.classList.toggle('expanded');
+function getCurrentFilter() {
+  return document.querySelector('#filters li.active').dataset.filter;
+}
+
+// Advanced Filter Functionality
+advancedFilterBtn.addEventListener('click', () => {
+  filterModal.style.display = 'flex';
+});
+
+applyFiltersBtn.addEventListener('click', () => {
+  advancedFiltersApplied = true;
+  filterModal.style.display = 'none';
+  renderTasks(getCurrentFilter(), searchInput.value.trim());
+});
+
+resetFiltersBtn.addEventListener('click', () => {
+  advancedFiltersApplied = false;
+  filterTitleInput.value = '';
+  filterDescInput.value = '';
+  filterDateFromInput.value = '';
+  filterDateToInput.value = '';
+  filterImportantInput.checked = false;
+  filterStatusSelect.value = '';
+  filterModal.style.display = 'none';
+  renderTasks(getCurrentFilter(), searchInput.value.trim());
+});
+
+// Drag and Drop Functionality
+function addDragAndDropListeners() {
+  const taskCards = document.querySelectorAll('.task-card');
+
+  taskCards.forEach((card) => {
+    card.addEventListener('dragstart', handleDragStart);
+    card.addEventListener('dragover', handleDragOver);
+    card.addEventListener('drop', handleDrop);
+    card.addEventListener('dragend', handleDragEnd);
+  });
+}
+
+let dragSrcEl = null;
+
+function handleDragStart(e) {
+  dragSrcEl = this;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+  this.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+  if (dragSrcEl !== this) {
+    const srcIndex = dragSrcEl.dataset.index;
+    const destIndex = this.dataset.index;
+    const temp = tasks[srcIndex];
+    tasks.splice(srcIndex, 1);
+    tasks.splice(destIndex, 0, temp);
+    saveTasksToStorage();
+    renderTasks(getCurrentFilter(), searchInput.value.trim());
+  }
+  return false;
+}
+
+function handleDragEnd(e) {
+  this.classList.remove('dragging');
+}
+
+// Download Tasks Functionality
+downloadTasksBtn.addEventListener('click', downloadTasks);
+
+function downloadTasks() {
+  const data = {
+    tasks: tasks,
+    profileImage: localStorage.getItem('profileImage') || '',
+    userName: localStorage.getItem('userName') || 'User',
+  };
+  const dataStr =
+    'data:text/json;charset=utf-8,' +
+    encodeURIComponent(JSON.stringify(data));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute('href', dataStr);
+  const filename = 'tasks.json';
+  downloadAnchorNode.setAttribute('download', filename);
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
+// Upload Tasks Functionality
+uploadTasksBtn.addEventListener('click', () => uploadInput.click());
+uploadInput.addEventListener('change', uploadTasks);
+
+function uploadTasks(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      if ('tasks' in importedData && Array.isArray(importedData.tasks)) {
+        tasks = importedData.tasks.map((task) => {
+          // Convert date formats if necessary
+          const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // yyyy-mm-dd
+          if (dateRegex.test(task.date)) {
+            // Convert to dd-mm-yyyy
+            const dateParts = task.date.split('-');
+            task.date = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+          }
+          return task;
         });
+        saveTasksToStorage();
+        renderTasks(getCurrentFilter(), searchInput.value.trim());
 
-        const taskDate = document.createElement('p');
-        taskDate.classList.add('date');
-        taskDate.innerText = 'Due: ' + task.date;
-
-        const taskStatus = document.createElement('span');
-        taskStatus.classList.add('status', task.status.toLowerCase());
-        taskStatus.innerText = task.status;
-
-        const actionsDiv = document.createElement('div');
-        actionsDiv.classList.add('actions');
-
-        const editBtn = document.createElement('button');
-        editBtn.innerHTML = '🖊';
-        editBtn.title = 'Edit Task';
-        editBtn.onclick = (e) => {
-          e.stopPropagation();
-          editTask(index);
-        };
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '✖';
-        deleteBtn.title = 'Delete Task';
-        deleteBtn.onclick = (e) => {
-          e.stopPropagation();
-          deleteTask(index);
-        };
-
-        const completeBtn = document.createElement('button');
-        completeBtn.innerHTML = task.status === 'Completed' ? '↺' : '✔';
-        completeBtn.title = task.status === 'Completed' ? 'Mark as Incomplete' : 'Mark as Completed';
-        completeBtn.onclick = (e) => {
-          e.stopPropagation();
-          toggleTaskStatus(index);
-        };
-
-        actionsDiv.append(editBtn, deleteBtn, completeBtn);
-        taskCard.append(actionsDiv, taskTitle, taskDesc, taskDate, taskStatus);
-        taskContainer.append(taskCard);
-      });
-
-      addDragAndDropListeners();
-    }
-
-    function deleteTask(index) {
-      tasks.splice(index, 1);
-      saveTasksToStorage();
-      renderTasks(getCurrentFilter(), searchInput.value.trim());
-    }
-
-    function toggleTaskStatus(index) {
-      tasks[index].status = tasks[index].status === 'Completed' ? 'Incomplete' : 'Completed';
-      saveTasksToStorage();
-      renderTasks(getCurrentFilter(), searchInput.value.trim());
-    }
-
-    function editTask(index) {
-      isEditing = true;
-      currentEditIndex = index;
-      const task = tasks[index];
-
-      document.getElementById('task-title-input').value = task.title;
-      document.getElementById('task-desc-input').value = task.desc;
-      document.getElementById('task-date-input').value = task.date;
-      document.getElementById('task-important-input').checked = task.important;
-      modalTitle.textContent = 'Edit Task';
-      modal.style.display = 'flex';
-    }
-
-    addTaskBtn.onclick = () => {
-      isEditing = false;
-      currentEditIndex = null;
-      modalTitle.textContent = 'Add New Task';
-      clearModalFields();
-      modal.style.display = 'flex';
-    };
-
-    closeModalBtn.onclick = () => {
-      modal.style.display = 'none';
-      clearModalFields();
-    };
-
-    saveTaskBtn.onclick = () => {
-      const title = document.getElementById('task-title-input').value.trim();
-      const desc = document.getElementById('task-desc-input').value.trim();
-      const date = document.getElementById('task-date-input').value;
-      const important = document.getElementById('task-important-input').checked;
-
-      if (title && desc && date) {
-        if (isEditing) {
-          tasks[currentEditIndex] = { ...tasks[currentEditIndex], title, desc, date, important };
-        } else {
-          tasks.push({ title, desc, date, status: 'Incomplete', important });
+        if ('profileImage' in importedData) {
+          localStorage.setItem('profileImage', importedData.profileImage);
+          profileImage.src = importedData.profileImage;
         }
-        modal.style.display = 'none';
-        saveTasksToStorage();
-        renderTasks(getCurrentFilter(), searchInput.value.trim());
-        clearModalFields();
+
+        if ('userName' in importedData) {
+          localStorage.setItem('userName', importedData.userName);
+          userNameDisplay.innerHTML = `<b><i>${importedData.userName}</i></b>`;
+          userNameInput.value = importedData.userName;
+        }
+
+        showMessage('Tasks and profile data uploaded successfully.');
       } else {
-        alert('Please fill in all fields.');
+        showMessage('Invalid file format.', 'error');
       }
+    } catch (error) {
+      showMessage('Error reading file.', 'error');
+    }
+  };
+  reader.readAsText(file);
+  uploadInput.value = '';
+}
+
+// Feedback Messages
+function showMessage(message, type = 'success') {
+  const messageBox = document.createElement('div');
+  messageBox.className = `message-box ${type === 'error' ? 'error' : ''}`;
+  messageBox.textContent = message;
+  document.body.appendChild(messageBox);
+  setTimeout(() => {
+    messageBox.remove();
+  }, 3000);
+}
+
+// Profile Picture Functionality
+const profileImage = document.getElementById('profile-image');
+const profileModal = document.getElementById('profile-modal');
+const closeProfileModalBtn = document.getElementById('close-profile-modal');
+const enterUrlBtn = document.getElementById('enter-url-btn');
+const selectImageBtn = document.getElementById('select-image-btn');
+const dropZone = document.getElementById('drop-zone');
+
+// Load profile image from localStorage if available
+const savedProfileImage = localStorage.getItem('profileImage');
+if (savedProfileImage) {
+  profileImage.src = savedProfileImage;
+}
+
+profileImage.addEventListener('click', function () {
+  profileModal.style.display = 'flex';
+});
+
+closeProfileModalBtn.addEventListener('click', function () {
+  profileModal.style.display = 'none';
+});
+
+enterUrlBtn.addEventListener('click', function () {
+  const imageUrl = prompt('Enter image URL:');
+  if (imageUrl) {
+    profileImage.src = imageUrl;
+    localStorage.setItem('profileImage', imageUrl);
+    profileModal.style.display = 'none';
+  }
+});
+
+selectImageBtn.addEventListener('click', function () {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+
+  fileInput.onchange = function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        profileImage.src = e.target.result;
+        localStorage.setItem('profileImage', e.target.result);
+        profileModal.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  fileInput.click();
+});
+
+dropZone.addEventListener('dragover', function (e) {
+  e.preventDefault();
+  dropZone.style.borderColor = 'var(--accent-color)';
+});
+
+dropZone.addEventListener('dragleave', function (e) {
+  e.preventDefault();
+  dropZone.style.borderColor = '#ccc';
+});
+
+dropZone.addEventListener('drop', function (e) {
+  e.preventDefault();
+  dropZone.style.borderColor = '#ccc';
+
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      profileImage.src = e.target.result;
+      localStorage.setItem('profileImage', e.target.result);
+      profileModal.style.display = 'none';
     };
+    reader.readAsDataURL(file);
+  } else {
+    alert('Please drop a valid image file.');
+  }
+});
 
-    function clearModalFields() {
-      document.getElementById('task-title-input').value = '';
-      document.getElementById('task-desc-input').value = '';
-      document.getElementById('task-date-input').value = '';
-      document.getElementById('task-important-input').checked = false;
-    }
+// User Name Functionality
+const userNameDisplay = document.getElementById('user-name');
+const userNameInput = document.getElementById('user-name-input');
 
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = 'none';
-        clearModalFields();
+// Load user name from localStorage if available
+const savedUserName = localStorage.getItem('userName');
+if (savedUserName) {
+  userNameDisplay.innerHTML = `<b><i>${savedUserName}</i></b>`;
+  userNameInput.value = savedUserName;
+}
+
+userNameDisplay.addEventListener('click', function () {
+  userNameDisplay.style.display = 'none';
+  userNameInput.style.display = 'block';
+  userNameInput.focus();
+});
+
+(function () {
+  const watermark = `
+╔══════════════════════════════════════════════════╗
+║                                                  ║
+║               © 2023 Encryptera                  ║
+║      All rights reserved. Unauthorized use       ║
+║      or distribution is strictly prohibited.     ║
+║                                                  ║
+║   This project is made by @Cheetah and is        ║
+║   personal intellectual property.                ║
+║                                                  ║
+║   For inquiries, please contact:                 ║
+║   encryptera.netlify.app/contact                 ║
+║                                                  ║
+╚══════════════════════════════════════════════════╝
+`;
+
+  console.log(watermark);
+
+  const originalConsoleLog = console.log;
+  console.log = function (...args) {
+    originalConsoleLog.apply(console, args);
+
+    if (args.length > 0) {
+      const lastArg = args[args.length - 1];
+
+      if (lastArg === 'info') {
+        originalConsoleLog('© 2023 Encryptera');
+      } else if (lastArg === 'contact') {
+        originalConsoleLog('https://encryptera.netlify.app/contact');
+      } else if (lastArg === 'creator') {
+        originalConsoleLog('@Cheetah');
       }
-    };
-
-    filters.forEach(filter => {
-      filter.addEventListener('click', function() {
-        document.querySelector('#filters li.active').classList.remove('active');
-        this.classList.add('active');
-        renderTasks(this.dataset.filter, searchInput.value.trim());
-      });
-    });
-
-    searchInput.addEventListener('input', function() {
-      renderTasks(getCurrentFilter(), this.value.trim());
-    });
-
-    function getCurrentFilter() {
-      return document.querySelector('#filters li.active').dataset.filter;
     }
+  };
+})();
 
-    // Drag and Drop Functionality
-    function addDragAndDropListeners() {
-      const taskCards = document.querySelectorAll('.task-card');
+function saveUserName() {
+  const newName = userNameInput.value.trim() || 'User';
+  userNameDisplay.innerHTML = `<b><i>${newName}</i></b>`;
+  userNameInput.value = newName;
+  localStorage.setItem('userName', newName);
+  userNameInput.style.display = 'none';
+  userNameDisplay.style.display = 'block';
+}
 
-      taskCards.forEach(card => {
-        card.addEventListener('dragstart', handleDragStart);
-        card.addEventListener('dragover', handleDragOver);
-        card.addEventListener('drop', handleDrop);
-        card.addEventListener('dragend', handleDragEnd);
-      });
-    }
+userNameInput.addEventListener('blur', saveUserName);
+userNameInput.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    saveUserName();
+  }
+});
 
-    let dragSrcEl = null;
+renderTasks();
 
-    function handleDragStart(e) {
-      dragSrcEl = this;
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/html', this.innerHTML);
-      this.classList.add('dragging');
-    }
-
-    function handleDragOver(e) {
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
-      e.dataTransfer.dropEffect = 'move';
-      return false;
-    }
-
-    function handleDrop(e) {
-      if (e.stopPropagation) {
-        e.stopPropagation();
-      }
-      if (dragSrcEl !== this) {
-        const srcIndex = dragSrcEl.dataset.index;
-        const destIndex = this.dataset.index;
-        const temp = tasks[srcIndex];
-        tasks.splice(srcIndex, 1);
-        tasks.splice(destIndex, 0, temp);
-        saveTasksToStorage();
-        renderTasks(getCurrentFilter(), searchInput.value.trim());
-      }
-      return false;
-    }
-
-    function handleDragEnd(e) {
-      this.classList.remove('dragging');
-    }
-
-    renderTasks();
   </script>
 </body>
-</html> 
+</html>
