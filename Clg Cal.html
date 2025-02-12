@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/256/13318/13318872.png" type="image/x-icon">
+    <title>CGPA Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 4.5.2 CSS and Font Awesome Icons -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #000;
+            --container-bg: #fff;
+            --output-bg: #e9ecef;
+            --table-header-bg: #343a40;
+            --table-header-text: #fff;
+            --nav-bg: #fff;
+            --nav-text: #000;
+        }
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --container-bg: #1e1e1e;
+            --output-bg: #2c2c2c;
+            --table-header-bg: #495057;
+            --table-header-text: #e0e0e0;
+            --nav-bg: #1e1e1e;
+            --nav-text: #e0e0e0;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            background-color: var(--container-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .output {
+            background-color: var(--output-bg);
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            position: relative;
+        }
+        table th, table td {
+            vertical-align: middle;
+        }
+        .table thead {
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+        }
+        .nav-tabs {
+            background-color: var(--nav-bg);
+        }
+        .nav-tabs .nav-link {
+            color: var(--nav-text);
+        }
+        .nav-tabs .nav-link.active {
+            background-color: var(--output-bg);
+            border-color: var(--table-header-bg) var(--table-header-bg) var(--output-bg);
+        }
+        .chart-container {
+            margin-top: 40px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input { 
+            opacity: 0; width: 0; height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .hidden {
+            display: none;
+        }
+
+        .fas.fa-plus {
+            font-size: 12px; 
+            color: #02050289; 
+            margin: 5px; 
+            transition: color 0.3s; 
+        }
+        .fas.fa-plus:hover {
+            color: #28a745; 
+            cursor: pointer; 
+        }
+
+        /* Additional Dark Mode Styles for Components */
+        .dark-mode .nav-tabs .nav-link.active {
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+        }
+        .dark-mode .table thead {
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+        }
+        .dark-mode .form-control, .dark-mode .form-select {
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            border: 1px solid #495057;
+        }
+        .dark-mode .form-control::placeholder {
+            color: #a1a1a1;
+        }
+        .dark-mode .btn-primary {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .dark-mode .btn-success {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        .dark-mode .btn-info {
+            background-color: #17a2b8;
+            border-color: #138496;
+        }
+        .dark-mode .btn-outline-secondary {
+            color: #e0e0e0;
+            border-color: #6c757d;
+        }
+        .dark-mode .btn-outline-primary {
+            color: #e0e0e0;
+            border-color: #007bff;
+        }
+        .dark-mode .output {
+            background-color: var(--output-bg);
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dark Mode Toggle -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>SGPA & CGPA Calculator</h2>
+            <div class="form-check form-switch">
+                <label class="form-check-label me-2" for="darkModeToggle">Dark Mode</label>
+                <div class="switch">
+                    <input type="checkbox" id="darkModeToggle" aria-label="Toggle Dark Mode">
+                    <span class="slider"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs" id="calculatorTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="sgpa-tab" data-toggle="tab" href="#sgpa" role="tab" aria-controls="sgpa" aria-selected="true">SGPA & CGPA Calculator</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="cs-tab" data-toggle="tab" href="#cs" role="tab" aria-controls="cs" aria-selected="false">CS Calculator</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="attendance-tab" data-toggle="tab" href="#attendance" role="tab" aria-controls="attendance" aria-selected="false">Attendance</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="calculatorTabsContent">
+            <!-- SGPA & CGPA Calculator Tab -->
+            <div class="tab-pane fade show active" id="sgpa" role="tabpanel" aria-labelledby="sgpa-tab">
+                <!-- Grade Point Customization Modal Trigger -->
+                <button class="btn btn-secondary mt-3 mb-3" data-toggle="modal" data-target="#gradeModal"><i class="fas fa-edit"></i> Customize Grades</button>
+
+                <!-- Grade Customization Modal -->
+                <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="gradeForm">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="gradeModalLabel">Customize Grade Points</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="gradeInputs">
+                                        <!-- Dynamic Grade Inputs -->
+                                    </div>
+                                    <button type="button" class="btn btn-primary mt-3" onclick="addGrade()">Add Grade</button>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-success">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Number of Subjects Input -->
+                <div class="mb-3">
+                    <label for="subjectCount" class="form-label">Number of Subjects:</label>
+                    <input type="number" id="subjectCount" class="form-control" placeholder="Enter number of subjects" min="1" aria-label="Number of Subjects">
+                </div>
+                <button class="btn btn-primary mb-4" onclick="generateTable()"><i class="fas fa-table"></i> Generate Table</button>
+
+                <!-- Subject Form -->
+                <form id="subjectForm"></form>
+
+                <!-- Calculate SGPA Button -->
+                <button class="btn btn-success mt-3" onclick="calculateSGPA()"><i class="fas fa-calculator"></i> Calculate SGPA</button>
+
+                <!-- SGPA Output -->
+                <div id="sgpaOutput" class="output" data-sgpa="-">SGPA: - 
+                    <button class="btn btn-sm btn-add-sgpa ms-3" onclick="addToCGPA()" title="Add SGPA to CGPA"><i class="fas fa-plus"></i></button>
+                </div>
+
+                <!-- CGPA Section -->
+                <div class="cgpa-section mt-5">
+                    <h4>Cumulative CGPA</h4>
+                    <div class="cgpa-list" id="cgpaList">
+                        <p>No SGPA added yet.</p>
+                    </div>
+                    <div id="cgpaOutput" class="output">CGPA: -</div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-secondary" onclick="exportCGPA()"><i class="fas fa-file-export"></i> Export CGPA</button>
+                        <button class="btn btn-outline-primary ms-2" onclick="addManualCGPA()"><i class="fas fa-plus-circle"></i> Add CGPA Manually</button>
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="chart-container hidden" id="chartContainer">
+                    <canvas id="cgpaChart"></canvas>
+                </div>
+            </div>
+
+            <!-- CS Calculator Tab -->
+            <div class="tab-pane fade" id="cs" role="tabpanel" aria-labelledby="cs-tab">
+                <!-- CS Calculator Content -->
+                <div class="mb-3 mt-3">
+                    <label for="totalMarks" class="form-label">Total Marks (Out of):</label>
+                    <input type="number" id="totalMarks" class="form-control" placeholder="Enter total marks" min="1" aria-label="Total Marks">
+                </div>
+                <button class="btn btn-primary mb-4" onclick="generateCSForm()"><i class="fas fa-list"></i> Generate Form</button>
+
+                <!-- CS Form -->
+                <form id="csForm"></form>
+
+                <!-- Calculate Converted Marks Button -->
+                <button class="btn btn-success mt-3" onclick="calculateConvertedMarks()"><i class="fas fa-calculator"></i> Calculate Converted Marks</button>
+                <div id="csOutput" class="output">Converted Marks: -</div>
+            </div>
+
+            <!-- Attendance Tab -->
+            <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab">
+                <h4 class="mt-3">Attendance Calculator</h4>
+                <div class="mb-3">
+                    <label for="attendanceSubjectCount" class="form-label">Number of Subjects:</label>
+                    <input type="number" id="attendanceSubjectCount" class="form-control" placeholder="Enter number of subjects" min="1" aria-label="Number of Subjects">
+                </div>
+                <button class="btn btn-primary mb-4" onclick="generateAttendanceTable()"><i class="fas fa-table"></i> Generate Attendance Table</button>
+                <form id="attendanceForm"></form>
+                <button class="btn btn-success mt-3" onclick="calculateAttendance()"><i class="fas fa-calculator"></i> Calculate Attendance</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 4.5.2 JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Use Bootstrap 4.5.2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FileSaver.js for Export -->
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Custom Script -->
+    <script>
+        // Declare variables globally
+        let gradeToPoint = {
+            'O': 10,
+            'A+': 9,
+            'A': 8,
+            'B+': 7,
+            'B': 6,
+            'C': 5,
+            'F': 0,
+            'Ab': 0,
+            'I': 0
+        };
+        let sgpaList = JSON.parse(localStorage.getItem('sgpaList')) || [];
+        let cgpaChart;
+
+        // Load gradeToPoint from localStorage if available
+        function loadGradePoints() {
+            const storedGrades = localStorage.getItem('gradeToPoint');
+            if (storedGrades) {
+                gradeToPoint = JSON.parse(storedGrades);
+            }
+            initializeGradeInputs();
+            updateGradeOptions();
+        }
+
+        // Initialize Grade Modal Inputs
+        const gradeForm = document.getElementById('gradeForm');
+        const gradeInputsDiv = document.getElementById('gradeInputs');
+
+        function initializeGradeInputs() {
+            gradeInputsDiv.innerHTML = '';
+            for (const [grade, point] of Object.entries(gradeToPoint)) {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'mb-3 row';
+                inputGroup.innerHTML = `
+                    <label class="col-sm-4 col-form-label">Grade ${grade}:</label>
+                    <div class="col-sm-8">
+                        <input type="number" class="form-control grade-point" data-grade="${grade}" value="${point}" min="0" max="10" required aria-label="Grade ${grade} Point">
+                    </div>
+                `;
+                gradeInputsDiv.appendChild(inputGroup);
+            }
+        }
+
+        // Add new grade
+        function addGrade() {
+            const newGrade = prompt("Enter new grade (e.g., D+):");
+            if (newGrade && !gradeToPoint.hasOwnProperty(newGrade)) {
+                gradeToPoint[newGrade] = 0;
+                initializeGradeInputs();
+            } else {
+                alert("Invalid or existing grade.");
+            }
+        }
+
+        // Save grade customization
+        gradeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const inputs = document.querySelectorAll('.grade-point');
+            const tempGradeToPoint = {};
+            let valid = true;
+            inputs.forEach(input => {
+                const grade = input.getAttribute('data-grade');
+                const point = parseFloat(input.value);
+                if (!grade || isNaN(point) || point < 0 || point > 10) {
+                    valid = false;
+                }
+                tempGradeToPoint[grade] = point;
+            });
+            if (valid) {
+                gradeToPoint = tempGradeToPoint;
+                updateGradeOptions();
+                localStorage.setItem('gradeToPoint', JSON.stringify(gradeToPoint));
+                alert("Grade points updated successfully.");
+                // Close the modal
+                $('#gradeModal').modal('hide');
+            } else {
+                alert("Please enter valid grade points between 0 and 10.");
+            }
+        });
+
+        // Update grade options in the table
+        function updateGradeOptions() {
+            const gradeSelects = document.querySelectorAll('.grade');
+            gradeSelects.forEach(select => {
+                const selectedValue = select.value;
+                select.innerHTML = '<option value="">Select Grade</option>';
+                for (const grade of Object.keys(gradeToPoint)) {
+                    const option = document.createElement('option');
+                    option.value = grade;
+                    option.textContent = grade;
+                    select.appendChild(option);
+                }
+                select.value = selectedValue;
+            });
+        }
+
+        // Toggle Dark Mode
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+            localStorage.setItem('darkMode', this.checked);
+        });
+
+        // Load dark mode preference
+        function loadDarkMode() {
+            const darkMode = localStorage.getItem('darkMode') === 'true';
+            darkModeToggle.checked = darkMode;
+            if (darkMode) {
+                document.documentElement.classList.add('dark-mode');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+            }
+        }
+
+        // SGPA & CGPA Calculator Functions
+        function generateTable() {
+            const subjectCount = parseInt(document.getElementById('subjectCount').value);
+            const form = document.getElementById('subjectForm');
+
+            if (isNaN(subjectCount) || subjectCount <= 0) {
+                alert('Please enter a valid number of subjects.');
+                return;
+            }
+
+            let tableHTML = `
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Course #</th>
+                            <th>Credits</th>
+                            <th>Grade Achieved</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Array.from({ length: subjectCount }, (_, i) => `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td><input type="number" class="form-control credit" placeholder="Credits" min="0" required aria-label="Credits for Course ${i + 1}"></td>
+                                <td>
+                                    <select class="form-select grade" required aria-label="Grade for Course ${i + 1}">
+                                        <option value="">Select Grade</option>
+                                        ${Object.keys(gradeToPoint).map(grade => `<option value="${grade}">${grade}</option>`).join('')}
+                                    </select>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            form.innerHTML = tableHTML;
+        }
+
+        function calculateSGPA() {
+            const credits = Array.from(document.querySelectorAll('.credit')).map(input => parseFloat(input.value));
+            const grades = Array.from(document.querySelectorAll('.grade')).map(select => select.value);
+
+            // Validation
+            for (let i = 0; i < credits.length; i++) {
+                if (isNaN(credits[i]) || credits[i] < 0) {
+                    alert(`Please enter valid credits (non-negative number) for Course ${i + 1}.`);
+                    return;
+                }
+                if (!grades[i] || !(grades[i] in gradeToPoint)) {
+                    alert(`Please select a valid grade for Course ${i + 1}.`);
+                    return;
+                }
+            }
+
+            let totalCredits = 0, weightedPoints = 0;
+
+            for (let i = 0; i < credits.length; i++) {
+                totalCredits += credits[i];
+                weightedPoints += credits[i] * gradeToPoint[grades[i]];
+            }
+
+            const sgpa = totalCredits ? (weightedPoints / totalCredits).toFixed(2) : 0;
+            const sgpaOutput = document.getElementById('sgpaOutput');
+            sgpaOutput.setAttribute('data-sgpa', sgpa);
+            sgpaOutput.innerHTML = `SGPA: ${sgpa} 
+                <button class="btn btn-sm btn-add-sgpa ms-3" onclick="addToCGPA()" title="Add SGPA to CGPA"><i class="fas fa-plus"></i></button>`;
+        }
+
+        function updateCGPAList() {
+            const listContainer = document.getElementById('cgpaList');
+            if (sgpaList.length === 0) {
+                listContainer.innerHTML = `<p>No SGPA added yet.</p>`;
+                document.getElementById('cgpaOutput').textContent = "CGPA: -";
+                clearChart();
+                return;
+            }
+            sgpaList.sort((a, b) => parseInt(a.semester) - parseInt(b.semester));
+            listContainer.innerHTML = sgpaList.map((item, index) => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Semester ${item.semester}: SGPA ${item.sgpa}</span>
+                    <div>
+                        <button class="btn btn-sm btn-warning me-2" onclick="editSGPA(${index})" title="Edit SGPA"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSGPA(${index})" title="Delete SGPA"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            calculateCGPA();
+            updateChart();
+        }
+
+        function addToCGPA() {
+            const sgpa = parseFloat(document.getElementById('sgpaOutput').getAttribute('data-sgpa'));
+
+            if (isNaN(sgpa) || sgpa < 0 || sgpa > 10) {
+                alert("Invalid SGPA. Calculate SGPA first.");
+                return;
+            }
+
+            let semester = prompt("Enter semester number:");
+            if (semester === null) return; // Cancelled
+            semester = semester.trim();
+            if (!semester) {
+                alert("Semester number cannot be empty.");
+                return;
+            }
+
+            // Check for duplicate semester
+            if (sgpaList.some(item => item.semester === semester)) {
+                alert("Semester already exists. Please edit the existing entry.");
+                return;
+            }
+
+            sgpaList.push({ semester, sgpa });
+            localStorage.setItem('sgpaList', JSON.stringify(sgpaList));
+            updateCGPAList();
+        }
+
+        function addManualCGPA() {
+            let cgpa = prompt("Enter CGPA:");
+            if (cgpa === null) return; // Cancelled
+            cgpa = parseFloat(cgpa);
+            if (isNaN(cgpa) || cgpa < 0 || cgpa > 10) {
+                alert("Please enter a valid CGPA between 0 and 10.");
+                return;
+            }
+
+            let semester = prompt("Enter semester number for manual CGPA:");
+            if (semester === null) return; // Cancelled
+            semester = semester.trim();
+            if (!semester) {
+                alert("Semester number cannot be empty.");
+                return;
+            }
+
+            // Check for duplicate semester
+            if (sgpaList.some(item => item.semester === semester)) {
+                alert("Semester already exists. Please edit the existing entry.");
+                return;
+            }
+
+            sgpaList.push({ semester, sgpa: cgpa });
+            localStorage.setItem('sgpaList', JSON.stringify(sgpaList));
+            updateCGPAList();
+        }
+
+        function editSGPA(index) {
+            const item = sgpaList[index];
+            let newSGPA = prompt(`Enter new SGPA for Semester ${item.semester}:`, item.sgpa);
+            if (newSGPA === null) return; // Cancelled
+            newSGPA = parseFloat(newSGPA);
+            if (isNaN(newSGPA) || newSGPA < 0 || newSGPA > 10) {
+                alert("Invalid SGPA value. Please enter a number between 0 and 10.");
+                return;
+            }
+            sgpaList[index].sgpa = newSGPA;
+            localStorage.setItem('sgpaList', JSON.stringify(sgpaList));
+            updateCGPAList();
+        }
+
+        function deleteSGPA(index) {
+            if (confirm(`Are you sure you want to delete Semester ${sgpaList[index].semester} SGPA?`)) {
+                sgpaList.splice(index, 1);
+                localStorage.setItem('sgpaList', JSON.stringify(sgpaList));
+                updateCGPAList();
+            }
+        }
+
+        function calculateCGPA() {
+            if (sgpaList.length === 0) {
+                document.getElementById('cgpaOutput').textContent = "CGPA: -";
+                return;
+            }
+
+            const totalSemesters = sgpaList.length;
+            const totalSGPA = sgpaList.reduce((sum, item) => sum + parseFloat(item.sgpa), 0);
+            const cgpa = (totalSGPA / totalSemesters).toFixed(2);
+
+            document.getElementById('cgpaOutput').textContent = `CGPA: ${cgpa}`;
+        }
+
+        function exportCGPA() {
+            if (sgpaList.length === 0) {
+                alert("No CGPA data to export.");
+                return;
+            }
+
+            const exportOption = prompt("Enter export format: CSV or PDF", "CSV");
+            if (!exportOption) return;
+
+            if (exportOption.toUpperCase() === "CSV") {
+                exportCSV();
+            } else if (exportOption.toUpperCase() === "PDF") {
+                exportPDF();
+            } else {
+                alert("Invalid export format.");
+            }
+        }
+
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Semester,SGPA\n";
+            sgpaList.forEach(item => {
+                csvContent += `${item.semester},${item.sgpa}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "cgpa_data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text("CGPA Data", 14, 22);
+            doc.setFontSize(12);
+            let y = 30;
+            sgpaList.forEach(item => {
+                doc.text(`Semester ${item.semester}: SGPA ${item.sgpa}`, 14, y);
+                y += 10;
+            });
+            const cgpaText = document.getElementById('cgpaOutput').textContent.split(': ')[1];
+            doc.text(`Overall CGPA: ${cgpaText}`, 14, y + 10);
+
+            // Add Chart Image
+            if (cgpaChart) {
+                const canvas = document.getElementById('cgpaChart');
+                const imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', 14, y + 20, 180, 100);
+            }
+
+            doc.save('cgpa_data.pdf');
+        }
+
+        // Chart.js Integration
+        function initializeChart() {
+            const ctx = document.getElementById('cgpaChart').getContext('2d');
+            cgpaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sgpaList.map(item => `Sem ${item.semester}`),
+                    datasets: [{
+                        label: 'SGPA',
+                        data: sgpaList.map(item => item.sgpa),
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        title: { display: true, text: 'CGPA Progression' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 10 }
+                    }
+                }
+            });
+            document.getElementById('chartContainer').classList.remove('hidden');
+        }
+
+        function updateChart() {
+            if (!cgpaChart) {
+                initializeChart();
+                return;
+            }
+            cgpaChart.data.labels = sgpaList.map(item => `Sem ${item.semester}`);
+            cgpaChart.data.datasets[0].data = sgpaList.map(item => item.sgpa);
+            cgpaChart.update();
+        }
+
+        function clearChart() {
+            if (cgpaChart) {
+                cgpaChart.destroy();
+                cgpaChart = null;
+                document.getElementById('chartContainer').classList.add('hidden');
+            }
+        }
+
+        // -------------------------
+        // Attendance Calculator Code
+        // -------------------------
+        function generateAttendanceTable() {
+            const subjectCount = parseInt(document.getElementById('attendanceSubjectCount').value);
+            const attendanceForm = document.getElementById('attendanceForm');
+
+            if (isNaN(subjectCount) || subjectCount <= 0) {
+                alert('Please enter a valid number of subjects.');
+                return;
+            }
+
+            let tableHTML = `
+                <table class="table table-bordered" id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Total Classes</th>
+                            <th>Attended Classes</th>
+                            <th>Attendance %</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${Array.from({ length: subjectCount }, (_, i) => `
+                            <tr>
+                                <td><input type="text" class="form-control subject-name" placeholder="Subject Name" required aria-label="Subject Name ${i + 1}"></td>
+                                <td><input type="number" class="form-control total-classes" placeholder="Total Classes" min="0" required aria-label="Total Classes ${i + 1}"></td>
+                                <td><input type="number" class="form-control attended-classes" placeholder="Attended Classes" min="0" required aria-label="Attended Classes ${i + 1}"></td>
+                                <td class="attendance-percentage"></td>
+                                <td class="attendance-status"></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            attendanceForm.innerHTML = tableHTML;
+        }
+
+        function calculateAttendance() {
+            const rows = document.querySelectorAll("#attendanceTable tbody tr");
+            if (!rows.length) {
+                alert("Please generate the attendance table first.");
+                return;
+            }
+            rows.forEach(row => {
+                const totalClassesInput = row.querySelector(".total-classes");
+                const attendedClassesInput = row.querySelector(".attended-classes");
+                const percentageCell = row.querySelector(".attendance-percentage");
+                const statusCell = row.querySelector(".attendance-status");
+
+                const totalClasses = parseInt(totalClassesInput.value);
+                const attendedClasses = parseInt(attendedClassesInput.value);
+
+                if (isNaN(totalClasses) || isNaN(attendedClasses) || totalClasses < 0 || attendedClasses < 0 || attendedClasses > totalClasses) {
+                    alert("Please enter valid numbers for total and attended classes. (Attended classes cannot exceed total classes)");
+                    return;
+                }
+
+                const percentage = totalClasses === 0 ? 0 : (attendedClasses / totalClasses) * 100;
+                percentageCell.textContent = `${percentage.toFixed(2)}%`;
+                // Set color based on percentage
+                percentageCell.style.color = percentage < 75 ? "red" : "green";
+
+                // Calculate how many more classes needed (if below 75) or how many can be bunked (if 75 or above)
+                if (percentage < 75) {
+                    // Solve: (attendedClasses + x) / (totalClasses + x) >= 0.75  =>  x >= (0.75 * totalClasses - attendedClasses) / (1 - 0.75)
+                    const needed = Math.ceil((0.75 * totalClasses - attendedClasses) / 0.25);
+                    statusCell.textContent = `Attend ${needed} more class${needed > 1 ? 'es' : ''}`;
+                } else {
+                    // Solve: attendedClasses / (totalClasses + x) >= 0.75  =>  x <= (attendedClasses / 0.75) - totalClasses
+                    const canBunk = Math.floor((attendedClasses / 0.75) - totalClasses);
+                    statusCell.textContent = `Can bunk ${canBunk} class${canBunk > 1 ? 'es' : ''}`;
+                }
+            });
+        }
+
+        function generateCSForm() {
+            const totalMarks = parseFloat(document.getElementById('totalMarks').value);
+            const csForm = document.getElementById('csForm');
+
+            if (isNaN(totalMarks) || totalMarks <= 0) {
+                alert('Please enter a valid total marks.');
+                return;
+            }
+
+            csForm.innerHTML = `
+                <div class="mb-3">
+                    <label for="marksInput" class="form-label">Enter your marks:</label>
+                    <input type="text" id="marksInput" class="form-control" placeholder="Enter marks (e.g., 85 or 85/100)" aria-label="Enter your marks">
+                </div>
+                <div class="mb-3">
+                    <label for="convertedTotal" class="form-label">Converted Total Marks (Out of):</label>
+                    <input type="number" id="convertedTotal" class="form-control" placeholder="Enter converted total marks" min="1" aria-label="Converted Total Marks">
+                </div>
+                
+                <div id="csGradeRange" class="mt-3"></div>
+            `;
+        }
+
+        function calculateConvertedMarks() {
+            const marksInput = document.getElementById('marksInput').value.trim();
+            const convertedTotal = parseFloat(document.getElementById('convertedTotal').value);
+            const originalTotal = parseFloat(document.getElementById('totalMarks').value);
+
+            if (!marksInput) {
+                alert('Please enter your marks.');
+                return;
+            }
+
+            if (isNaN(convertedTotal) || convertedTotal <= 0) {
+                alert('Please enter a valid converted total marks.');
+                return;
+            }
+
+            let earnedMarks, totalMarks;
+
+            if (marksInput.includes('/')) {
+                const parts = marksInput.split('/');
+                if (parts.length !== 2) {
+                    alert('Invalid marks format. Use xx/yy format.');
+                    return;
+                }
+                earnedMarks = parseFloat(parts[0]);
+                totalMarks = parseFloat(parts[1]);
+                if (isNaN(earnedMarks) || isNaN(totalMarks) || earnedMarks < 0 || totalMarks <= 0) {
+                    alert('Please enter valid marks in the format xx/yy.');
+                    return;
+                }
+            } else {
+                earnedMarks = parseFloat(marksInput);
+                totalMarks = originalTotal;
+                if (isNaN(earnedMarks) || earnedMarks < 0 || isNaN(totalMarks) || totalMarks <= 0) {
+                    alert('Please enter valid marks.');
+                    return;
+                }
+            }
+
+            // Check if internal marks have been provided
+            const internalMarksField = document.getElementById('internalMarks');
+            const csGradeRangeDiv = document.getElementById('csGradeRange');
+            if (internalMarksField && internalMarksField.value.trim() !== '') {
+                const internalMarks = parseFloat(internalMarksField.value);
+                if (isNaN(internalMarks) || internalMarks < 0 || internalMarks > 60) {
+                    alert('Please enter valid internal marks between 0 and 60.');
+                    return;
+                }
+                // Calculate overall obtained and overall total (assuming exam marks + internals)
+                const overallObtained = internalMarks + earnedMarks;
+                const overallTotal = 60 + totalMarks;
+                const overallConverted = (overallObtained / overallTotal) * convertedTotal;
+                document.getElementById('csOutput').textContent = `Converted Marks (Overall): ${overallConverted.toFixed(2)}`;
+
+                // Calculate possible minimum and maximum overall converted marks
+                const minOverall = ((internalMarks + 0) / overallTotal) * convertedTotal;
+                const maxOverall = ((internalMarks + totalMarks) / overallTotal) * convertedTotal;
+
+                // Simple grading scheme for demonstration
+                function getGrade(score) {
+                    if (score >= 90) return 'O';
+                    else if (score >= 80) return 'A+';
+                    else if (score >= 70) return 'A';
+                    else if (score >= 60) return 'B+';
+                    else if (score >= 50) return 'B';
+                    else if (score >= 40) return 'C';
+                    else return 'F';
+                }
+                let gradeRangeText = `Possible Range: Minimum Converted Marks: ${minOverall.toFixed(2)} (Grade: ${getGrade(minOverall)}), Maximum Converted Marks: ${maxOverall.toFixed(2)} (Grade: ${getGrade(maxOverall)}).`;
+                csGradeRangeDiv.textContent = gradeRangeText;
+            } else {
+                // No internal marks provided, use exam marks only
+                const convertedMarks = (earnedMarks / totalMarks) * convertedTotal;
+                document.getElementById('csOutput').textContent = `Converted Marks: ${convertedMarks.toFixed(2)}`;
+                csGradeRangeDiv.textContent = '';
+            }
+        }
+
+        // Initial Load
+        window.onload = function() {
+            loadGradePoints();
+            loadDarkMode();
+            updateCGPAList();
+            if (sgpaList.length > 0) {
+                initializeChart();
+                updateChart();
+            }
+        };
+
+        (function () {
+            const watermark = `
+            ╔══════════════════════════════════════════╗
+            ║                                          ║
+            ║           © 2024 Encryptera              ║
+            ║  All rights reserved. Unauthorized use   ║
+            ║ or distribution is strictly prohibited.  ║
+            ║                                          ║
+            ║    This project is made by @Cheetah      ║
+            ║                                          ║
+            ╚══════════════════════════════════════════╝
+            `;
+
+            // Show the default watermark when the console is opened
+            console.log(watermark);
+
+            // Override console.log to check for specific input
+            const originalConsoleLog = console.log;
+            console.log = function (...args) {
+                // Call the original console.log
+                originalConsoleLog.apply(console, args);
+
+                // Check the last argument for specific commands
+                if (args.length > 0) {
+                    const lastArg = args[args.length - 1];
+
+                    if (lastArg === 'group') {
+                        originalConsoleLog('~ SCCR');
+                    } else if (lastArg === 'creator') {
+                        originalConsoleLog('@Cheetah');
+                    }
+                }
+            };
+        })();
+    </script>
+</body>
+</html> 
