@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- For responsiveness -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="https://cdn3.iconfinder.com/data/icons/audit-3/512/34_Approved_Tick_Fact_Check_Mark_Document-512.png" type="image/x-icon">
+  <title>404 Contest Admin Tool</title>
+  <style>
+    /* Reset & Global Styles */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f4;
+      color: #333;
+      line-height: 1.6;
+    }
+    a { color: #005ea2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Site Header */
+    .site-header {
+      background: #003366;
+      color: #fff;
+      padding: 20px 30px;
+      margin-bottom: 20px;
+      text-align: center;
+      border-bottom: 3px solid #005ea2;
+    }
+    .site-header h1 { margin: 0; font-size: 2em; letter-spacing: 1px; }
+
+    /* Containers */
+    .container {
+      background: #fff;
+      padding: 20px 30px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .section { margin-bottom: 30px; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      font-size: 1em;
+    }
+    textarea { height: 250px; font-family: monospace; resize: vertical; }
+
+    /* Buttons */
+    button {
+      background-color: #005ea2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 5px 0 0;
+      transition: background-color 0.2s ease;
+    }
+    button:hover { background-color: #004080; }
+
+    /* Toggles & Panels */
+    .toggles, .judging-params, .admin-section, .automation-section {
+      background: #f1f7fb;
+      padding: 15px;
+      border: 1px solid #cbd9e1;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .toggles label { font-weight: normal; cursor: pointer; margin-bottom: 8px; display: block; }
+    .judging-params ul { list-style: none; padding-left: 0; }
+    .judging-params li {
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    .judging-params li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #007a3d;
+    }
+    .advanced-settings { display: none; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px; }
+
+    /* Preview & Results */
+    .preview-container {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      overflow: auto;
+      background: #fff;
+      /* Make it resizable by mouse */
+      resize: both;
+      width: 1024px;
+      height: 600px;
+      margin-bottom: 10px;
+    }
+    .preview-container iframe { width: 100%; height: 100%; border: none; }
+    .results {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    .result-item { margin-bottom: 10px; }
+
+    /* Score Log Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    table, th, td { border: 1px solid #ddd; }
+    th, td { padding: 8px; text-align: center; }
+    th { background: #f1f7fb; }
+
+    /* Hidden Iframe */
+    .hidden-iframe { display: none; }
+
+    /* Preview Layout Settings */
+    .preview-layout-settings {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+    .preview-layout-settings label { font-weight: normal; }
+    .preview-layout-settings input { padding: 5px; width: auto; }
+
+    /* Automation Drop Zone */
+    .drop-zone {
+      border: 2px dashed #005ea2;
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+      color: #005ea2;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .drop-zone.hover {
+      background-color: #e6f2ff;
+    }
+  </style>
+  <!-- jsPDF Library for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- Site Header -->
+  <header class="site-header">
+    <h1>404 Contest Admin Tool</h1>
+  </header>
+
+  <!-- === Submission & Auto‑Check Section === -->
+  <div class="container section">
+    <a style="position: absolute; top: 20px; right: 30px;" target="_blank" href="https://pdfhost.io/v/Sr5HypudL_404_webpage" title="Help/Instructions">ⓘ</a>
+    <h2 style="color: #003366; text-align: center;">Submission Auto‑Check Tool</h2>
+    
+    <div class="toggles">
+      <h3>Active Judging Criteria (Toggle to enable/disable)</h3>
+      <label><input type="checkbox" id="codeSizeToggle" checked> Code Size (<span id="codeSizeLabel">Advanced Points</span>)</label>
+      <label><input type="checkbox" id="loadSpeedToggle" checked> Load Speed (<span id="loadSpeedLabel">Advanced Points</span>)</label>
+      <label><input type="checkbox" id="domCountToggle" checked> DOM Elements Count (<span id="domCountLabel">Advanced Points</span>)</label>
+      <label><input type="checkbox" id="viewportExistsToggle" checked> Viewport Meta Tag Exists (<span id="viewportExistsLabel">Advanced Points</span>)</label>
+      <label><input type="checkbox" id="viewportProperToggle" checked> Proper Viewport Meta Tag (<span id="viewportProperLabel">Advanced Points</span>)</label>
+      <label><input type="checkbox" id="svgToggle" checked> Inline SVG Integration (<span id="inlineSvgLabel">Advanced Points</span>)</label>
+    </div>
+    
+    <!-- Code Input Area -->
+    <div class="input-group">
+      <label for="codeInput">Paste HTML Code:</label>
+      <textarea id="codeInput" placeholder="Paste your HTML code here..."></textarea>
+    </div>
+    <div class="input-group">
+      <label for="fileInput">Or Upload a Single HTML File:</label>
+      <input type="file" id="fileInput" accept=".html,.htm">
+    </div>
+    <button id="analyzeBtn">Analyze Code</button>
+  </div>
+  
+  <!-- === Analysis Results (Auto‑Score: 40 pts) === -->
+  <div class="container section">
+    <h2>Analysis Results (Auto‑Score: 40 pts)</h2>
+    <div class="results" id="results">
+      <div id="breakdown"></div>
+      <div id="finalScore" style="font-size: 1.2em; font-weight: bold; margin-top: 15px;"></div>
+    </div>
+  </div>
+  
+  <!-- === Submission Preview & Layout Options === -->
+  <div class="container section">
+    <h2>Submission Preview</h2>
+    <div class="preview-layout-settings">
+      <label for="previewWidth">Preview Width:</label>
+      <input type="text" id="previewWidth" placeholder="e.g. 100%, 1024px" value="1024px">
+      <label for="previewHeight">Preview Height:</label>
+      <input type="text" id="previewHeight" placeholder="e.g. 600px" value="600px">
+      <button id="applyPreviewLayoutBtn">Apply Layout</button>
+    </div>
+    <div class="preview-container">
+      <iframe id="previewFrame"></iframe>
+    </div>
+    <p style="text-align:center; font-style:italic;">Drag the lower-right corner of the preview to adjust its size.</p>
+  </div>
+  
+  <!-- === Judging Parameters for Contestants === -->
+  <div class="container section judging-params">
+    <h2>Judging Parameters for Contestants</h2>
+    <ul style="margin: 20px;">
+      <li><strong>Code Size:</strong> ≤ [Full Threshold] bytes earns full points; sizes up to [Maximum Threshold] bytes will be deducted proportionally.</li>
+      <li><strong>Load Speed:</strong> ≤ [Full Threshold] ms earns full points; every extra ms (up to [Maximum Threshold] ms) deducts points proportionally.</li>
+      <li><strong>DOM Elements Count:</strong> A count between [Min] and [Max] earns full points; deductions apply outside this range.</li>
+      <li><strong>Viewport Meta Tag Exists:</strong> Must include a meta tag with name "viewport".</li>
+      <li><strong>Proper Viewport Meta Tag:</strong> The meta tag must be exactly configured as "width=device-width, initial-scale=1".</li>
+      <li><strong>Inline SVG Integration:</strong> Must contain original, hand‑coded inline SVG graphics.</li>
+      <li><strong>Animation Presence:</strong> Submission should include at least one custom animation (CSS/JS) to enhance interactivity.</li>
+      <li><strong>Design & Visual Appeal (50 pts):</strong> Manually scored.</li>
+      <li><strong>Custom Team Name SVG Integration (10 pts):</strong> Manually scored.</li>
+    </ul>
+    <p style="font-size: 0.9em; color: #555;">Note: The technical (auto‑score) section is worth 40 points. The remaining 60 points are awarded manually.</p>
+  </div>
+  
+  <!-- === Scoring Constraints & Advanced Settings (Admin) === -->
+  <div class="container section admin-section">
+    <h2>Scoring Constraints Settings (Admin)</h2>
+    <button id="toggleAdvancedSettingsBtn">Toggle Advanced Scoring Settings</button>
+    <div id="advancedSettings" class="advanced-settings">
+      <div class="input-group">
+        <label for="codeSizeFullInput">Code Size Full Threshold (bytes):</label>
+        <input type="number" id="codeSizeFullInput" value="7000" min="0">
+      </div>
+      <div class="input-group">
+        <label for="codeSizeMaxInput">Code Size Maximum Threshold (bytes):</label>
+        <input type="number" id="codeSizeMaxInput" value="25000" min="0">
+      </div>
+      <div class="input-group">
+        <label for="codeSizePointsInput">Points for Code Size:</label>
+        <input type="number" id="codeSizePointsInput" value="8" min="0">
+      </div>
+      <div class="input-group">
+        <label for="loadTimeFullInput">Load Speed Full Threshold (ms):</label>
+        <input type="number" id="loadTimeFullInput" value="12" min="0">
+      </div>
+      <div class="input-group">
+        <label for="loadTimeMaxInput">Load Speed Maximum Threshold (ms):</label>
+        <input type="number" id="loadTimeMaxInput" value="75" min="0">
+      </div>
+      <div class="input-group">
+        <label for="loadSpeedPointsInput">Points for Load Speed:</label>
+        <input type="number" id="loadSpeedPointsInput" value="8" min="0">
+      </div>
+      <div class="input-group">
+        <label for="domCountMinInput">DOM Count Minimum:</label>
+        <input type="number" id="domCountMinInput" value="18" min="0">
+      </div>
+      <div class="input-group">
+        <label for="domCountMaxInput">DOM Count Maximum:</label>
+        <input type="number" id="domCountMaxInput" value="150" min="0">
+      </div>
+      <div class="input-group">
+        <label for="domCountBelowStepInput">DOM Count Deduction Step (below min):</label>
+        <input type="number" id="domCountBelowStepInput" value="5" min="1">
+      </div>
+      <div class="input-group">
+        <label for="domCountAboveStepInput">DOM Count Deduction Step (above max):</label>
+        <input type="number" id="domCountAboveStepInput" value="10" min="1">
+      </div>
+      <div class="input-group">
+        <label for="domCountPointsInput">Points for DOM Count:</label>
+        <input type="number" id="domCountPointsInput" value="8" min="0">
+      </div>
+      <div class="input-group">
+        <label for="viewportExistsPointsInput">Points for Viewport Exists:</label>
+        <input type="number" id="viewportExistsPointsInput" value="8" min="0">
+      </div>
+      <div class="input-group">
+        <label for="viewportProperPointsInput">Points for Proper Viewport:</label>
+        <input type="number" id="viewportProperPointsInput" value="4" min="0">
+      </div>
+      <div class="input-group">
+        <label for="inlineSvgPointsInput">Points for Inline SVG:</label>
+        <input type="number" id="inlineSvgPointsInput" value="4" min="0">
+      </div>
+    </div>
+  </div>
+  
+  <!-- === Automation Section (Admin) === -->
+  <div class="container section automation-section">
+    <h2>Automation (Batch Judging)</h2>
+    <div class="input-group">
+      <label><input type="checkbox" id="automationToggle"> Enable Automation</label>
+    </div>
+    <div class="input-group">
+      <label for="automationFileInput">Select Multiple HTML Files:</label>
+      <input type="file" id="automationFileInput" accept=".html,.htm" multiple>
+    </div>
+    <div id="automationDropZone" class="drop-zone">Drag &amp; drop HTML files here</div>
+    <p style="font-size:0.9em; color:#555;">Files must be named as <code>team_name.html</code> so the team name is auto‑extracted.</p>
+  </div>
+  
+  <!-- === Admin Logging Section === -->
+  <div class="container section admin-section">
+    <h2>Team Score Logging (Admin Only)</h2>
+    <div class="input-group">
+      <label for="teamName">Team Name:</label>
+      <input type="text" id="teamName" placeholder="Team name auto‑filled in automation mode">
+    </div>
+    <div class="input-group">
+      <label for="designScore">Design &amp; Visual Appeal Score (0–50):</label>
+      <input type="number" id="designScore" min="0" max="50" placeholder="Enter design score...">
+    </div>
+    <div class="input-group">
+      <label for="teamSvgScore">Team Name SVG Score (0–10):</label>
+      <input type="number" id="teamSvgScore" min="0" max="10" placeholder="Enter custom SVG score...">
+    </div>
+    <div class="input-group">
+      <label for="conversionFactorInput">Conversion Factor (0–100, default 15):</label>
+      <input type="number" id="conversionFactorInput" min="0" max="100" value="15">
+    </div>
+    <button id="logScoreBtn">Log Team Score</button>
+    <button id="resetLogBtn" style="background-color:#d9534f;">Reset Logs</button>
+    <div style="margin-top:20px;">
+      <table id="scoreLogTable">
+        <thead>
+          <tr>
+            <th>Team Name</th>
+            <th>Auto‑Score (40)</th>
+            <th>Design Score (50)</th>
+            <th>Team SVG Score (10)</th>
+            <th>Total Score (100)</th>
+            <th>Converted Marks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Logged scores will appear here -->
+        </tbody>
+      </table>
+    </div>
+    <div style="text-align:center; margin-top:20px;">
+      <button id="downloadPdfBtn">Download Scores as PDF</button>
+      <button id="downloadCsvBtn">Download Scores as CSV</button>
+    </div>
+  </div>
+  
+  <!-- === Hidden Iframe for Dynamic Measurements === -->
+  <iframe id="testFrame" class="hidden-iframe"></iframe>
+  
+  <script>
+    /***********************
+     * Utility Functions
+     ***********************/
+    function getByteSize(str) {
+      return new Blob([str]).size;
+    }
+    
+    /***********************
+     * Global Variables
+     ***********************/
+    let submittedCode = "";
+    let currentAutoScore = 0; // Auto‑score out of 40
+    const scoreLog = [];      // Array to store logged team scores
+
+    // For automation
+    let automationFiles = [];
+    let automationIndex = 0;
+    
+    /***********************
+     * Advanced Scoring Settings Toggle
+     ***********************/
+    document.getElementById("toggleAdvancedSettingsBtn").addEventListener("click", function() {
+      const adv = document.getElementById("advancedSettings");
+      adv.style.display = adv.style.display === "none" || adv.style.display === "" ? "block" : "none";
+    });
+    
+    /***********************
+     * Scoring Functions (Auto‑Score out of 40)
+     ***********************/
+    function scoreForCodeSize(size) {
+      const fullThreshold = parseInt(document.getElementById("codeSizeFullInput").value, 10);
+      const maxThreshold = parseInt(document.getElementById("codeSizeMaxInput").value, 10);
+      const maxPoints = parseFloat(document.getElementById("codeSizePointsInput").value) || 8;
+      if (size <= fullThreshold) return maxPoints;
+      else if (size <= maxThreshold) {
+        return Math.round(maxPoints * ((maxThreshold - size) / (maxThreshold - fullThreshold)));
+      } else return 0;
+    }
+    
+    function scoreForLoadTime(loadTime) {
+      const fullTime = parseInt(document.getElementById("loadTimeFullInput").value, 10);
+      const maxTime = parseInt(document.getElementById("loadTimeMaxInput").value, 10);
+      const maxPoints = parseFloat(document.getElementById("loadSpeedPointsInput").value) || 8;
+      if (loadTime <= fullTime) return maxPoints;
+      else if (loadTime <= maxTime) {
+        return Math.round(maxPoints * ((maxTime - loadTime) / (maxTime - fullTime)));
+      } else return 0;
+    }
+    
+    function scoreForDomCount(count) {
+      const domMin = parseInt(document.getElementById("domCountMinInput").value, 10);
+      const domMax = parseInt(document.getElementById("domCountMaxInput").value, 10);
+      const belowStep = parseInt(document.getElementById("domCountBelowStepInput").value, 10);
+      const aboveStep = parseInt(document.getElementById("domCountAboveStepInput").value, 10);
+      const maxPoints = parseFloat(document.getElementById("domCountPointsInput").value) || 8;
+      
+      if (count >= domMin && count <= domMax) return maxPoints;
+      else if (count < domMin) {
+        let missing = domMin - count;
+        return Math.max(maxPoints - Math.floor(missing / belowStep), 0);
+      } else {
+        let extra = count - domMax;
+        return Math.max(maxPoints - Math.floor(extra / aboveStep), 0);
+      }
+    }
+    
+    function scoreForViewportExists(doc) {
+      const meta = doc.querySelector('meta[name="viewport"]');
+      const maxPoints = parseFloat(document.getElementById("viewportExistsPointsInput").value) || 8;
+      return meta ? maxPoints : 0;
+    }
+    
+    function scoreForViewportProper(doc) {
+      const meta = doc.querySelector('meta[name="viewport"]');
+      const maxPoints = parseFloat(document.getElementById("viewportProperPointsInput").value) || 4;
+      if (!meta) return 0;
+      let content = meta.getAttribute("content") || "";
+      content = content.replace(/\s/g, "").toLowerCase();
+      return (content === "width=device-width,initial-scale=1") ? maxPoints : 0;
+    }
+    
+    function scoreForInlineSVG(code) {
+      const maxPoints = parseFloat(document.getElementById("inlineSvgPointsInput").value) || 4;
+      return code.toLowerCase().includes("<svg") ? maxPoints : 0;
+    }
+    
+    function checkAnimation(code) {
+      const lowerCode = code.toLowerCase();
+      return (lowerCode.includes("animation:") || lowerCode.includes("@keyframes") || lowerCode.includes("transition:"));
+    }
+    
+    function parseHTML(code) {
+      const parser = new DOMParser();
+      return parser.parseFromString(code, "text/html");
+    }
+    
+    /***********************
+     * File Upload & Automation Handlers
+     ***********************/
+    document.getElementById("fileInput").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          submittedCode = evt.target.result;
+          document.getElementById("codeInput").value = submittedCode;
+        };
+        reader.readAsText(file);
+      }
+    });
+    
+    // Automation file input (multiple)
+    document.getElementById("automationFileInput").addEventListener("change", function(e) {
+      automationFiles = Array.from(e.target.files).filter(f => f.name.toLowerCase().endsWith('.html') || f.name.toLowerCase().endsWith('.htm'));
+      automationFiles.sort((a, b) => a.name.localeCompare(b.name));
+      automationIndex = 0;
+      if(document.getElementById("automationToggle").checked) {
+        processNextAutomationFile();
+      }
+    });
+    
+    // Drag and drop for automation
+    const dropZone = document.getElementById("automationDropZone");
+    dropZone.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      dropZone.classList.add("hover");
+    });
+    dropZone.addEventListener("dragleave", function(e) {
+      dropZone.classList.remove("hover");
+    });
+    dropZone.addEventListener("drop", function(e) {
+      e.preventDefault();
+      dropZone.classList.remove("hover");
+      automationFiles = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.html') || f.name.toLowerCase().endsWith('.htm'));
+      automationFiles.sort((a, b) => a.name.localeCompare(b.name));
+      automationIndex = 0;
+      if(document.getElementById("automationToggle").checked) {
+        processNextAutomationFile();
+      }
+    });
+    
+    /***********************
+     * Analyze Code Handler
+     ***********************/
+    function analyzeCode() {
+      submittedCode = document.getElementById("codeInput").value.trim();
+      if (!submittedCode) {
+        alert("Please paste your code or upload an HTML file.");
+        return;
+      }
+      
+      // Reset previous results
+      document.getElementById("breakdown").innerHTML = "";
+      document.getElementById("finalScore").innerHTML = "";
+      currentAutoScore = 0;
+      let totalScore = 0;
+      let maxScore = 0;
+      let breakdownHTML = "";
+      
+      const totalSize = getByteSize(submittedCode);
+      const parsedDoc = parseHTML(submittedCode);
+      
+      // Code Size Check
+      if (document.getElementById("codeSizeToggle").checked) {
+        const codeScore = scoreForCodeSize(totalSize);
+        totalScore += codeScore;
+        maxScore += parseFloat(document.getElementById("codeSizePointsInput").value) || 8;
+        breakdownHTML += `<div class="result-item"><strong>Code Size:</strong> ${totalSize} bytes (Score: ${codeScore})</div>`;
+      }
+      
+      // Viewport Exists
+      if (document.getElementById("viewportExistsToggle").checked) {
+        const vpExistsScore = scoreForViewportExists(parsedDoc);
+        totalScore += vpExistsScore;
+        maxScore += parseFloat(document.getElementById("viewportExistsPointsInput").value) || 8;
+        breakdownHTML += `<div class="result-item"><strong>Viewport Meta Tag Exists:</strong> ${vpExistsScore ? "Yes" : "No"} (Score: ${vpExistsScore})</div>`;
+      }
+      
+      // Proper Viewport
+      if (document.getElementById("viewportProperToggle").checked) {
+        const vpProperScore = scoreForViewportProper(parsedDoc);
+        totalScore += vpProperScore;
+        maxScore += parseFloat(document.getElementById("viewportProperPointsInput").value) || 4;
+        breakdownHTML += `<div class="result-item"><strong>Proper Viewport Tag:</strong> ${vpProperScore ? "Correct" : "Incorrect/Missing"} (Score: ${vpProperScore})</div>`;
+      }
+      
+      // Inline SVG
+      if (document.getElementById("svgToggle").checked) {
+        const svgScore = scoreForInlineSVG(submittedCode);
+        totalScore += svgScore;
+        maxScore += parseFloat(document.getElementById("inlineSvgPointsInput").value) || 4;
+        breakdownHTML += `<div class="result-item"><strong>Inline SVG:</strong> ${svgScore ? "Present" : "Not Found"} (Score: ${svgScore})</div>`;
+      }
+      
+      // Animation Check
+      const animationPresent = checkAnimation(submittedCode);
+      breakdownHTML += `<div class="result-item"><strong>Animation Present:</strong> ${animationPresent ? "True" : "False"}</div>`;
+      
+      // Dynamic Checks via Hidden Iframe
+      const iframe = document.getElementById("testFrame");
+      const newIframe = iframe.cloneNode();
+      newIframe.id = "testFrame";
+      newIframe.style.display = "none";
+      iframe.parentNode.replaceChild(newIframe, iframe);
+      
+      const startTime = performance.now();
+      newIframe.srcdoc = submittedCode;
+      newIframe.onload = function() {
+        const loadTime = performance.now() - startTime;
+        if (document.getElementById("loadSpeedToggle").checked) {
+          const loadScore = scoreForLoadTime(loadTime);
+          totalScore += loadScore;
+          maxScore += parseFloat(document.getElementById("loadSpeedPointsInput").value) || 8;
+          breakdownHTML += `<div class="result-item"><strong>Load Time:</strong> ${loadTime.toFixed(0)} ms (Score: ${loadScore})</div>`;
+        }
+        if (document.getElementById("domCountToggle").checked) {
+          const iframeDoc = newIframe.contentDocument || newIframe.contentWindow.document;
+          const domCount = iframeDoc.getElementsByTagName("*").length;
+          const domScore = scoreForDomCount(domCount);
+          totalScore += domScore;
+          maxScore += parseFloat(document.getElementById("domCountPointsInput").value) || 8;
+          breakdownHTML += `<div class="result-item"><strong>DOM Elements Count:</strong> ${domCount} (Score: ${domScore})</div>`;
+        }
+        document.getElementById("breakdown").innerHTML = breakdownHTML;
+        document.getElementById("finalScore").innerHTML = `Final Auto‑Score: ${totalScore} / ${maxScore}`;
+        currentAutoScore = totalScore;
+        document.getElementById("previewFrame").srcdoc = submittedCode;
+      };
+    }
+    
+    document.getElementById("analyzeBtn").addEventListener("click", analyzeCode);
+    
+    /***********************
+     * Preview Layout Handler
+     ***********************/
+    document.getElementById("applyPreviewLayoutBtn").addEventListener("click", function() {
+      const previewWidth = document.getElementById("previewWidth").value.trim();
+      const previewHeight = document.getElementById("previewHeight").value.trim();
+      const previewFrame = document.getElementById("previewFrame");
+      if (previewWidth) previewFrame.parentElement.style.width = previewWidth;
+      if (previewHeight) previewFrame.parentElement.style.height = previewHeight;
+    });
+    
+    /***********************
+     * Automation Processing
+     ***********************/
+    function processNextAutomationFile() {
+      if (automationIndex >= automationFiles.length) {
+        alert("All files have been processed.");
+        return;
+      }
+      const file = automationFiles[automationIndex];
+      // Check if team already exists in log (by file name without extension)
+      const teamNameCandidate = file.name.replace(/\.[^/.]+$/, "");
+      const existing = scoreLog.find(entry => entry.teamName.toLowerCase() === teamNameCandidate.toLowerCase());
+      if (existing) {
+        alert(`Team "${teamNameCandidate}" has already been judged. Skipping file.`);
+        automationIndex++;
+        processNextAutomationFile();
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        submittedCode = evt.target.result;
+        document.getElementById("codeInput").value = submittedCode;
+        // Auto-fill team name from file name
+        document.getElementById("teamName").value = teamNameCandidate;
+        // Auto-run analysis
+        analyzeCode();
+      };
+      reader.readAsText(file);
+      automationIndex++;
+    }
+    
+    /***********************
+     * Logging Functions
+     ***********************/
+    document.getElementById("logScoreBtn").addEventListener("click", function() {
+      const teamName = document.getElementById("teamName").value.trim();
+      const designScore = parseInt(document.getElementById("designScore").value, 10);
+      const teamSvgScore = parseInt(document.getElementById("teamSvgScore").value, 10);
+      if (!teamName) { alert("Please enter a team name."); return; }
+      if (isNaN(designScore) || designScore < 0 || designScore > 50) { alert("Enter a valid design score (0–50)."); return; }
+      if (isNaN(teamSvgScore) || teamSvgScore < 0 || teamSvgScore > 10) { alert("Enter a valid team SVG score (0–10)."); return; }
+      // Check for duplicate team
+      if (scoreLog.some(entry => entry.teamName.toLowerCase() === teamName.toLowerCase())) {
+        alert(`Team "${teamName}" has already been logged.`);
+        return;
+      }
+      if (currentAutoScore === null || currentAutoScore === undefined) {
+        alert("Please run the auto‑check before logging a score.");
+        return;
+      }
+      const totalCombined = currentAutoScore + designScore + teamSvgScore;
+      const teamData = { teamName, autoScore: currentAutoScore, designScore, teamSvgScore, totalScore: totalCombined };
+      scoreLog.push(teamData);
+      updateScoreTable();
+      // Clear manual score fields
+      document.getElementById("teamName").value = "";
+      document.getElementById("designScore").value = "";
+      document.getElementById("teamSvgScore").value = "";
+      // If automation is enabled, load next file
+      if (document.getElementById("automationToggle").checked && automationFiles.length > 0) {
+        setTimeout(processNextAutomationFile, 500);
+      }
+    });
+    
+    function updateScoreTable() {
+      const tbody = document.getElementById("scoreLogTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      let convFactor = parseFloat(document.getElementById("conversionFactorInput").value);
+      if (isNaN(convFactor) || convFactor < 0 || convFactor > 100) {
+        convFactor = 15;
+        document.getElementById("conversionFactorInput").value = 15;
+      }
+      scoreLog.forEach(function(entry) {
+        const convMarks = (entry.totalScore * (convFactor / 100)).toFixed(2);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td contenteditable="true" data-index="teamName">${entry.teamName}</td>
+                        <td contenteditable="true" data-index="autoScore">${entry.autoScore}</td>
+                        <td contenteditable="true" data-index="designScore">${entry.designScore}</td>
+                        <td contenteditable="true" data-index="teamSvgScore">${entry.teamSvgScore}</td>
+                        <td contenteditable="true" data-index="totalScore">${entry.totalScore}</td>
+                        <td contenteditable="true" data-index="convertedMarks">${convMarks}</td>`;
+        tbody.appendChild(tr);
+      });
+      attachCellListeners();
+    }
+    
+    function attachCellListeners() {
+      const cells = document.querySelectorAll("#scoreLogTable td[contenteditable='true']");
+      cells.forEach(cell => {
+        cell.addEventListener("focus", function(e) {
+          e.target.dataset.origValue = e.target.innerText;
+        });
+        cell.addEventListener("blur", function(e) {
+          if (e.target.innerText !== e.target.dataset.origValue) {
+            if (!confirm("Are you sure you want to change this cell?")) {
+              e.target.innerText = e.target.dataset.origValue;
+            }
+          }
+        });
+      });
+    }
+    
+    document.getElementById("resetLogBtn").addEventListener("click", function() {
+      if (confirm("Reset all logged scores?")) {
+        scoreLog.length = 0;
+        updateScoreTable();
+      }
+    });
+    
+    /***********************
+     * Export Functions
+     ***********************/
+    document.getElementById("downloadPdfBtn").addEventListener("click", function() {
+      if (scoreLog.length === 0) { alert("No team scores logged yet."); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Contest Team Scores", 14, 20);
+      doc.setFontSize(12);
+      let y = 30;
+      let convFactor = parseFloat(document.getElementById("conversionFactorInput").value);
+      if (isNaN(convFactor) || convFactor < 0 || convFactor > 100) convFactor = 15;
+      doc.text("Team Name | Auto‑Score | Design Score | Team SVG Score | Total Score | Converted Marks", 14, y);
+      y += 7;
+      scoreLog.forEach(function(entry) {
+        const convMarks = (entry.totalScore * (convFactor / 100)).toFixed(2);
+        const line = `${entry.teamName} | ${entry.autoScore} | ${entry.designScore} | ${entry.teamSvgScore} | ${entry.totalScore} | ${convMarks}`;
+        doc.text(line, 14, y);
+        y += 7;
+      });
+      doc.save("Team_Scores.pdf");
+    });
+    
+    document.getElementById("downloadCsvBtn").addEventListener("click", function() {
+      if (scoreLog.length === 0) { alert("No team scores logged yet."); return; }
+      let convFactor = parseFloat(document.getElementById("conversionFactorInput").value);
+      if (isNaN(convFactor) || convFactor < 0 || convFactor > 100) convFactor = 15;
+      let csvContent = "data:text/csv;charset=utf-8,Team Name,Auto-Score,Design Score,Team SVG Score,Total Score,Converted Marks\n";
+      scoreLog.forEach(function(entry) {
+        const convMarks = (entry.totalScore * (convFactor / 100)).toFixed(2);
+        const row = `${entry.teamName},${entry.autoScore},${entry.designScore},${entry.teamSvgScore},${entry.totalScore},${convMarks}`;
+        csvContent += row + "\n";
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "Team_Scores.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    
+    document.getElementById("conversionFactorInput").addEventListener("change", updateScoreTable);
+  </script>
+</body>
+</html> 
