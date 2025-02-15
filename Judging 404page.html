@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- For responsiveness -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="https://cdn3.iconfinder.com/data/icons/audit-3/512/34_Approved_Tick_Fact_Check_Mark_Document-512.png" type="image/x-icon">
   <title>404 Contest Admin Tool</title>
   <style>
-    /* Reset & Global Styles */
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -20,7 +18,6 @@
     a { color: #005ea2; text-decoration: none; }
     a:hover { text-decoration: underline; }
 
-    /* Site Header */
     .site-header {
       background: #003366;
       color: #fff;
@@ -31,7 +28,6 @@
     }
     .site-header h1 { margin: 0; font-size: 2em; letter-spacing: 1px; }
 
-    /* Containers */
     .container {
       background: #fff;
       padding: 20px 30px;
@@ -59,7 +55,6 @@
     }
     textarea { height: 250px; font-family: monospace; resize: vertical; }
 
-    /* Buttons */
     button {
       background-color: #005ea2;
       color: #fff;
@@ -73,7 +68,6 @@
     }
     button:hover { background-color: #004080; }
 
-    /* Toggles & Panels */
     .toggles, .judging-params, .admin-section, .automation-section {
       background: #f1f7fb;
       padding: 15px;
@@ -157,9 +151,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <!-- Site Header -->
   <header class="site-header">
-    <h1>404 Contest Admin Tool</h1>
+    <h1 title="CS API: Cheetah-Sher API ">404 Contest Admin Tool</h1>
   </header>
 
   <!-- === Submission & Auto‑Check Section === -->
@@ -654,7 +647,6 @@
       const teamData = { teamName, autoScore: currentAutoScore, designScore, teamSvgScore, totalScore: totalCombined };
       scoreLog.push(teamData);
       updateScoreTable();
-      // Clear manual score fields
       document.getElementById("teamName").value = "";
       document.getElementById("designScore").value = "";
       document.getElementById("teamSvgScore").value = "";
